@@ -1,0 +1,229 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.ErrorException;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.MouseEvent;
+import java.util.Iterator;
+
+public class GCompound extends GObject implements GContainer, GScalable {
+    private boolean complete = false;
+    private GObjectList contents = new GObjectList(this);
+    private GObject lastObject;
+    private GObject dragObject;
+    static final long serialVersionUID = 1L;
+
+    public GCompound() {
+    }
+
+    public void add(GObject var1) {
+        if (this.complete) {
+            throw new ErrorException("You can't add objects to a GCompound that has been marked as complete.");
+        } else {
+            this.contents.add(var1);
+            this.repaint();
+        }
+    }
+
+    public final void add(GObject var1, double var2, double var4) {
+        var1.setLocation(var2, var4);
+        this.add(var1);
+    }
+
+    public final void add(GObject var1, GPoint var2) {
+        this.add(var1, var2.getX(), var2.getY());
+    }
+
+    public void remove(GObject var1) {
+        if (this.complete) {
+            throw new ErrorException("You can't remove objects from a GCompound that has been marked as complete.");
+        } else {
+            this.contents.remove(var1);
+            this.repaint();
+        }
+    }
+
+    public void removeAll() {
+        if (this.complete) {
+            throw new ErrorException("You can't remove objects from a GCompound that has been marked as complete.");
+        } else {
+            this.contents.removeAll();
+            this.repaint();
+        }
+    }
+
+    public int getElementCount() {
+        return this.contents.getElementCount();
+    }
+
+    public GObject getElement(int var1) {
+        return this.contents.getElement(var1);
+    }
+
+    public GObject getElementAt(double var1, double var3) {
+        return this.contents.getElementAt(var1, var3, false);
+    }
+
+    public final GObject getElementAt(GPoint var1) {
+        return this.getElementAt(var1.getX(), var1.getY());
+    }
+
+    public Iterator<GObject> iterator() {
+        return new GIterator(this, 0);
+    }
+
+    public Iterator<GObject> iterator(int var1) {
+        return new GIterator(this, var1);
+    }
+
+    public void paint(Graphics var1) {
+        var1 = var1.create();
+        var1.translate(GMath.round(this.getX()), GMath.round(this.getY()));
+        this.contents.mapPaint(var1);
+    }
+
+    public void scale(double var1, double var3) {
+        Component var5 = this.getComponent();
+        boolean var6 = false;
+        if (var5 instanceof GCanvas) {
+            var6 = ((GCanvas)var5).getAutoRepaintFlag();
+            ((GCanvas)var5).setAutoRepaintFlag(false);
+        }
+
+        for(int var7 = this.getElementCount() - 1; var7 >= 0; --var7) {
+            GObject var8 = this.getElement(var7);
+            var8.setLocation(var1 * var8.getX(), var3 * var8.getY());
+            if (var8 instanceof GScalable) {
+                ((GScalable)var8).scale(var1, var3);
+            }
+        }
+
+        if (var5 instanceof GCanvas) {
+            ((GCanvas)var5).setAutoRepaintFlag(var6);
+        }
+
+        this.repaint();
+    }
+
+    public final void scale(double var1) {
+        this.scale(var1, var1);
+    }
+
+    public GRectangle getBounds() {
+        GRectangle var1 = this.contents.getBounds();
+        var1.translate(this.getX(), this.getY());
+        return var1;
+    }
+
+    public boolean contains(double var1, double var3) {
+        return this.contents.contains(var1 - this.getX(), var3 - this.getY());
+    }
+
+    public final GPoint getCanvasPoint(GPoint var1) {
+        return this.getCanvasPoint(var1.getX(), var1.getY());
+    }
+
+    public GPoint getCanvasPoint(double var1, double var3) {
+        GCompound var6;
+        for(Object var5 = this; var5 instanceof GCompound; var5 = var6.getParent()) {
+            var6 = (GCompound)var5;
+            var1 += var6.getX();
+            var3 += var6.getY();
+        }
+
+        return new GPoint(var1, var3);
+    }
+
+    public final GPoint getLocalPoint(GPoint var1) {
+        return this.getLocalPoint(var1.getX(), var1.getY());
+    }
+
+    public GPoint getLocalPoint(double var1, double var3) {
+        GCompound var6;
+        for(Object var5 = this; var5 instanceof GCompound; var5 = var6.getParent()) {
+            var6 = (GCompound)var5;
+            var1 -= var6.getX();
+            var3 -= var6.getY();
+        }
+
+        return new GPoint(var1, var3);
+    }
+
+    public void markAsComplete() {
+        this.complete = true;
+    }
+
+    protected void sendToFront(GObject var1) {
+        this.contents.sendToFront(var1);
+        this.repaint();
+    }
+
+    protected void sendToBack(GObject var1) {
+        this.contents.sendToBack(var1);
+        this.repaint();
+    }
+
+    protected void sendForward(GObject var1) {
+        this.contents.sendForward(var1);
+        this.repaint();
+    }
+
+    protected void sendBackward(GObject var1) {
+        this.contents.sendBackward(var1);
+        this.repaint();
+    }
+
+    protected void fireMouseListeners(MouseEvent var1) {
+        if (super.areMouseListenersEnabled()) {
+            super.fireMouseListeners(var1);
+        } else {
+            GPoint var2 = new GPoint((double)var1.getX() - this.getX(), (double)var1.getY() - this.getY());
+            GObject var3 = this.getElementAt(var2);
+            MouseEvent var4 = null;
+            if (var3 != this.lastObject) {
+                if (this.lastObject != null) {
+                    var4 = GCanvas.createMouseEvent(this.lastObject, 505, var1);
+                    this.lastObject.fireMouseListeners(var4);
+                }
+
+                if (var3 != null) {
+                    var4 = GCanvas.createMouseEvent(var3, 504, var1);
+                    var3.fireMouseListeners(var4);
+                }
+            }
+
+            this.lastObject = var3;
+            if (this.dragObject != null) {
+                var3 = this.dragObject;
+            }
+
+            if (var3 != null) {
+                int var5 = var1.getID();
+                if (var5 != 505 && var5 != 504) {
+                    if (var5 == 501) {
+                        this.dragObject = var3;
+                    } else if (var5 == 502) {
+                        this.dragObject = null;
+                    }
+
+                    var4 = GCanvas.createMouseEvent(var3, var5, var1);
+                    var3.fireMouseListeners(var4);
+                }
+            }
+
+            if (var4 != null && var4.isConsumed()) {
+                var1.consume();
+            }
+
+        }
+    }
+
+    protected boolean areMouseListenersEnabled() {
+        return super.areMouseListenersEnabled() ? true : this.contents.areMouseListenersEnabled();
+    }
+}
