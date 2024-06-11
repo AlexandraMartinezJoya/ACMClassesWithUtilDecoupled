@@ -1,0 +1,79 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Point;
+import java.io.Serializable;
+
+public class GPoint implements Serializable {
+    private double xc;
+    private double yc;
+    static final long serialVersionUID = 1L;
+
+    public GPoint() {
+        this(0.0D, 0.0D);
+    }
+
+    public GPoint(double var1, double var3) {
+        this.xc = var1;
+        this.yc = var3;
+    }
+
+    public GPoint(GPoint var1) {
+        this(var1.xc, var1.yc);
+    }
+
+    public GPoint(Point var1) {
+        this((double)var1.x, (double)var1.y);
+    }
+
+    public double getX() {
+        return this.xc;
+    }
+
+    public double getY() {
+        return this.yc;
+    }
+
+    public void setLocation(double var1, double var3) {
+        this.xc = var1;
+        this.yc = var3;
+    }
+
+    public void setLocation(GPoint var1) {
+        this.setLocation(var1.xc, var1.yc);
+    }
+
+    public GPoint getLocation() {
+        return new GPoint(this.xc, this.yc);
+    }
+
+    public void translate(double var1, double var3) {
+        this.xc += var1;
+        this.yc += var3;
+    }
+
+    public Point toPoint() {
+        return new Point((int)Math.round(this.xc), (int)Math.round(this.yc));
+    }
+
+    public int hashCode() {
+        return (new Float((float)this.xc)).hashCode() ^ 37 * (new Float((float)this.yc)).hashCode();
+    }
+
+    public boolean equals(Object var1) {
+        if (!(var1 instanceof GPoint)) {
+            return false;
+        } else {
+            GPoint var2 = (GPoint)var1;
+            return (float)this.xc == (float)var2.xc && (float)this.yc == (float)var2.yc;
+        }
+    }
+
+    public String toString() {
+        return "(" + (float)this.xc + ", " + (float)this.yc + ")";
+    }
+}
