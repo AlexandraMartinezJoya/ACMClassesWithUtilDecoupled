@@ -1,0 +1,5 @@
+package acm.util.concurent.locks;
+
+public interface Unlock {
+    void unlock();
+}
