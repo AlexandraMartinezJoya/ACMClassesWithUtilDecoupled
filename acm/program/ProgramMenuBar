@@ -1,0 +1,343 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.util.ErrorException;
+import acm.util.Platform;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.KeyStroke;
+
+public class ProgramMenuBar extends JMenuBar implements Iterable<JMenuItem> {
+    public static final int SHIFT = 131072;
+    private Program program;
+    private ActionListener menuBarListener;
+    private ActionListener focusedListener;
+    private HashMap<KeyStroke, JMenuItem> accelerators;
+    private HashSet<JMenuItem> focusedItems;
+    private MenuBar oldStyleMenuBar;
+    private boolean macMenuBarFlag;
+
+    public ProgramMenuBar(Program var1) {
+        this.program = var1;
+        this.menuBarListener = new ProgramMenuBarListener(this);
+        this.focusedListener = null;
+        this.accelerators = new HashMap();
+        this.focusedItems = new HashSet();
+        this.macMenuBarFlag = true;
+        this.addMenus();
+    }
+
+    public Program getProgram() {
+        return this.program;
+    }
+
+    public JMenuItem createStandardItem(String var1) {
+        JMenuItem var2 = null;
+        if (var1.equals("Quit")) {
+            var2 = this.createProgramItem(var1);
+            if (Platform.isMac()) {
+                this.setAccelerator(var2, 81);
+            } else {
+                var2.setName("Exit");
+            }
+        } else if (var1.equals("Cut")) {
+            var2 = this.createFocusedItem(var1, 88);
+            if (!Platform.isMac()) {
+                var2.setName("Cut (x)");
+            }
+        } else if (var1.equals("Copy")) {
+            var2 = this.createFocusedItem(var1, 67);
+            if (!Platform.isMac()) {
+                var2.setName("Copy (c)");
+            }
+        } else if (var1.equals("Paste")) {
+            var2 = this.createFocusedItem(var1, 86);
+            if (!Platform.isMac()) {
+                var2.setName("Paste (v)");
+            }
+        } else if (var1.equals("Select All")) {
+            var2 = this.createFocusedItem(var1, 65);
+        } else if (var1.equals("Save")) {
+            var2 = this.createFocusedItem(var1, 83);
+        } else if (var1.equals("Save As")) {
+            var2 = this.createFocusedItem(var1);
+        } else if (var1.equals("Print")) {
+            var2 = this.createProgramItem(var1, 80);
+            var2.setName("Print...");
+        } else if (var1.equals("Print Console")) {
+            var2 = this.createProgramItem(var1);
+        } else if (var1.equals("Script")) {
+            var2 = this.createProgramItem(var1);
+            var2.setName("Script...");
+        } else if (var1.equals("Export Applet")) {
+            var2 = this.createProgramItem(var1);
+            var2.setName("Export Applet...");
+        } else {
+            if (!var1.equals("Submit Project")) {
+                throw new ErrorException("Illegal standard menu item: " + var1);
+            }
+
+            var2 = this.createProgramItem(var1);
+            var2.setName("Submit Project...");
+        }
+
+        return var2;
+    }
+
+    public JMenuItem createProgramItem(String var1) {
+        JMenuItem var2 = new JMenuItem(var1);
+        var2.setActionCommand(var1);
+        var2.addActionListener(this.menuBarListener);
+        return var2;
+    }
+
+    public JMenuItem createProgramItem(String var1, int var2) {
+        JMenuItem var3 = this.createProgramItem(var1);
+        this.setAccelerator(var3, var2);
+        return var3;
+    }
+
+    public JMenuItem createFocusedItem(String var1) {
+        JMenuItem var2 = this.createProgramItem(var1);
+        this.focusedItems.add(var2);
+        return var2;
+    }
+
+    public JMenuItem createFocusedItem(String var1, int var2) {
+        JMenuItem var3 = this.createFocusedItem(var1);
+        this.setAccelerator(var3, var2);
+        return var3;
+    }
+
+    public boolean isFocusedItem(JMenuItem var1) {
+        return this.focusedItems.contains(var1);
+    }
+
+    public void setAccelerator(JMenuItem var1, int var2) {
+        int var3 = Platform.isMac() ? 4 : 2;
+        if (var2 > 65536) {
+            var2 -= 131072;
+            var3 |= 1;
+        }
+
+        KeyStroke var4 = KeyStroke.getKeyStroke((char)var2, var3);
+        this.accelerators.put(var4, var1);
+        if (Platform.isMac()) {
+            var1.setAccelerator(var4);
+        } else {
+            var1.setMnemonic(var2);
+        }
+
+    }
+
+    public void setEnabled(String var1, boolean var2) {
+        int var3 = this.getMenuCount();
+
+        for(int var4 = 0; var4 < var3; ++var4) {
+            this.setEnabled(this.getMenu(var4), var1, var2);
+        }
+
+    }
+
+    public void install(Component var1) {
+        Container var2 = this.program.getContentPane();
+
+        while(var1 != null && !(var1 instanceof JFrame)) {
+            var1 = ((Component)var1).getParent();
+            if (var1 == var2 && this.program.isAppletMode()) {
+                if (!Platform.isMac() || !this.macMenuBarFlag) {
+                    this.program.setJMenuBar(this);
+                }
+
+                return;
+            }
+        }
+
+        if (var1 != null) {
+            JFrame var3 = (JFrame)var1;
+            if (Platform.isMac() && this.macMenuBarFlag) {
+                if (this.oldStyleMenuBar == null) {
+                    this.oldStyleMenuBar = this.createOldStyleMenuBar();
+                }
+
+                var3.setMenuBar(this.oldStyleMenuBar);
+            } else {
+                var3.setJMenuBar(this);
+                var3.validate();
+            }
+
+        }
+    }
+
+    public void setMacMenuBarFlag(boolean var1) {
+        this.macMenuBarFlag = var1;
+    }
+
+    public boolean getMacMenuBarFlag() {
+        return this.macMenuBarFlag;
+    }
+
+    public void fireActionListeners(ActionEvent var1) {
+        if (this.focusedListener != null && this.focusedItems.contains(var1.getSource())) {
+            this.focusedListener.actionPerformed(var1);
+        } else {
+            this.program.menuAction(var1);
+        }
+
+    }
+
+    public boolean fireAccelerator(KeyEvent var1) {
+        KeyStroke var2 = KeyStroke.getKeyStrokeForEvent(var1);
+        JMenuItem var3 = (JMenuItem)this.accelerators.get(var2);
+        if (var3 != null) {
+            var3.doClick(0);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public void setFocusedListener(ActionListener var1) {
+        this.focusedListener = var1;
+    }
+
+    public Iterator<JMenuItem> iterator() {
+        ArrayList var1 = new ArrayList();
+
+        for(int var2 = 0; var2 < this.getMenuCount(); ++var2) {
+            this.addItemToList(var1, this.getMenu(var2));
+        }
+
+        return var1.iterator();
+    }
+
+    protected void addMenus() {
+        this.addFileMenu();
+        this.addEditMenu();
+    }
+
+    protected void addFileMenu() {
+        JMenu var1 = new JMenu("File");
+        var1.setMnemonic('F');
+        this.addFileMenuItems(var1);
+        this.add(var1);
+    }
+
+    protected void addEditMenu() {
+        JMenu var1 = new JMenu("Edit");
+        var1.setMnemonic('E');
+        this.addEditMenuItems(var1);
+        this.add(var1);
+    }
+
+    protected void addFileMenuItems(JMenu var1) {
+        var1.add(this.createStandardItem("Save"));
+        var1.add(this.createStandardItem("Save As"));
+        var1.addSeparator();
+        var1.add(this.createStandardItem("Print"));
+        var1.add(this.createStandardItem("Print Console"));
+        var1.add(this.createStandardItem("Script"));
+        var1.addSeparator();
+        var1.add(this.createStandardItem("Export Applet"));
+        var1.add(this.createStandardItem("Submit Project"));
+        var1.addSeparator();
+        var1.add(this.createStandardItem("Quit"));
+    }
+
+    protected void addEditMenuItems(JMenu var1) {
+        var1.add(this.createStandardItem("Cut"));
+        var1.add(this.createStandardItem("Copy"));
+        var1.add(this.createStandardItem("Paste"));
+        var1.add(this.createStandardItem("Select All"));
+    }
+
+    private void addItemToList(ArrayList<JMenuItem> var1, JMenuItem var2) {
+        if (var2 != null) {
+            if (var2 instanceof JMenu) {
+                JMenu var3 = (JMenu)var2;
+
+                for(int var4 = 0; var4 < var3.getItemCount(); ++var4) {
+                    this.addItemToList(var1, var3.getItem(var4));
+                }
+            } else {
+                var1.add(var2);
+            }
+
+        }
+    }
+
+    private MenuBar createOldStyleMenuBar() {
+        MenuBar var1 = new MenuBar();
+        int var2 = this.getMenuCount();
+
+        for(int var3 = 0; var3 < var2; ++var3) {
+            var1.add(this.createOldStyleMenu(this.getMenu(var3)));
+        }
+
+        return var1;
+    }
+
+    private Menu createOldStyleMenu(JMenu var1) {
+        Menu var2 = new Menu(var1.getText());
+        int var3 = var1.getItemCount();
+
+        for(int var4 = 0; var4 < var3; ++var4) {
+            var2.add(this.createOldStyleMenuItem(var1.getItem(var4)));
+        }
+
+        return var2;
+    }
+
+    private MenuItem createOldStyleMenuItem(Object var1) {
+        if (var1 == null) {
+            return new MenuItem("-");
+        } else if (var1 instanceof JMenu) {
+            return this.createOldStyleMenu((JMenu)var1);
+        } else if (var1 instanceof JCheckBoxMenuItem) {
+            return new OldStyleCheckBoxMenuItem((JCheckBoxMenuItem)var1);
+        } else if (var1 instanceof JMenuItem) {
+            return new OldStyleMenuItem((JMenuItem)var1);
+        } else {
+            throw new ErrorException("Unsupported menu item type");
+        }
+    }
+
+    private void setEnabled(JMenu var1, String var2, boolean var3) {
+        JMenu var4 = var1;
+        int var5 = var1.getItemCount();
+
+        for(int var6 = 0; var6 < var5; ++var6) {
+            JMenuItem var7 = var4.getItem(var6);
+            if (var7 != null) {
+                this.setEnabled(var7, var2, var3);
+            }
+        }
+
+    }
+
+    private void setEnabled(JMenuItem var1, String var2, boolean var3) {
+        if (var2.equals(var1.getActionCommand())) {
+            var1.setEnabled(var3);
+        }
+
+    }
+}
