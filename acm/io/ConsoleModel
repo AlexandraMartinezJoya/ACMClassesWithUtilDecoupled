@@ -1,0 +1,66 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.io;
+
+import acm.program.ProgramMenuBar;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.PrintJob;
+import java.io.BufferedReader;
+
+interface ConsoleModel {
+    int OUTPUT_STYLE = 0;
+    int INPUT_STYLE = 1;
+    int ERROR_STYLE = 2;
+
+    void setConsole(IOConsole var1);
+
+    IOConsole getConsole();
+
+    void print(String var1, int var2);
+
+    String readLine();
+
+    void setInputScript(BufferedReader var1);
+
+    BufferedReader getInputScript();
+
+    void clear();
+
+    String getText();
+
+    String getText(int var1, int var2);
+
+    int getLength();
+
+    Component getConsolePane();
+
+    Component getTextPane();
+
+    void cut();
+
+    void copy();
+
+    void paste();
+
+    void selectAll();
+
+    boolean isPointSelection();
+
+    void print(PrintJob var1);
+
+    void setInputStyle(int var1);
+
+    void setInputColor(Color var1);
+
+    void setErrorStyle(int var1);
+
+    void setErrorColor(Color var1);
+
+    void requestFocus();
+
+    void setMenuBar(ProgramMenuBar var1);
+}
