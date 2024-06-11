@@ -1,0 +1,91 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.JTFTools;
+import acm.util.MediaTools;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+
+public class GLabel extends GObject {
+    public static final Font DEFAULT_FONT = new Font("Default", 0, 12);
+    private String label;
+    private Font labelFont;
+    private static final Component DUMMY_COMPONENT = MediaTools.getImageObserver();
+    static final long serialVersionUID = 1L;
+
+    public GLabel(String var1) {
+        this(var1, 0.0D, 0.0D);
+    }
+
+    public GLabel(String var1, double var2, double var4) {
+        this.label = var1;
+        this.setFont(DEFAULT_FONT);
+        this.setLocation(var2, var4);
+    }
+
+    public void setFont(Font var1) {
+        this.labelFont = JTFTools.getStandardFont(var1);
+        this.repaint();
+    }
+
+    public void setFont(String var1) {
+        this.setFont(JTFTools.decodeFont(var1, this.getFont()));
+    }
+
+    public Font getFont() {
+        return this.labelFont;
+    }
+
+    public void setLabel(String var1) {
+        this.label = var1;
+        this.repaint();
+    }
+
+    public String getLabel() {
+        return this.label;
+    }
+
+    public void paint(Graphics var1) {
+        var1.setFont(this.labelFont);
+        var1.drawString(this.label, GMath.round(this.getX()), GMath.round(this.getY()));
+    }
+
+    public double getWidth() {
+        return (double)this.getFontMetrics().stringWidth(this.label);
+    }
+
+    public double getHeight() {
+        return (double)this.getFontMetrics().getHeight();
+    }
+
+    public double getAscent() {
+        return (double)this.getFontMetrics().getAscent();
+    }
+
+    public double getDescent() {
+        return (double)this.getFontMetrics().getDescent();
+    }
+
+    public FontMetrics getFontMetrics() {
+        Component var1 = this.getComponent();
+        if (var1 == null) {
+            var1 = DUMMY_COMPONENT;
+        }
+
+        return var1.getFontMetrics(this.labelFont);
+    }
+
+    public GRectangle getBounds() {
+        return new GRectangle(this.getX(), this.getY() - this.getAscent(), this.getWidth(), this.getHeight());
+    }
+
+    public String paramString() {
+        return super.paramString() + ", string=\"" + this.label + "\"";
+    }
+}
