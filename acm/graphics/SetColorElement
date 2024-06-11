@@ -1,0 +1,21 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Color;
+import java.awt.Graphics;
+
+class SetColorElement extends PathElement {
+    private Color myColor;
+
+    public SetColorElement(Color var1) {
+        this.myColor = var1;
+    }
+
+    public void paint(Graphics var1, PathState var2) {
+        var1.setColor(this.myColor);
+    }
+}
