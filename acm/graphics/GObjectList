@@ -1,0 +1,174 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Graphics;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+class GObjectList implements Serializable {
+    private GContainer parent;
+    private ArrayList<GObject> contents;
+    private ArrayList<GObject> enabledList;
+
+    public GObjectList(GContainer var1) {
+        this.parent = var1;
+        this.contents = new ArrayList();
+        if (this.parent instanceof GCanvas) {
+            this.enabledList = new ArrayList();
+        }
+
+    }
+
+    public synchronized void add(GObject var1) {
+        if (var1.getParent() != null) {
+            var1.getParent().remove(var1);
+        }
+
+        var1.setParent(this.parent);
+        this.contents.add(var1);
+        if (this.enabledList != null && var1.areMouseListenersEnabled()) {
+            this.enabledList.add(var1);
+        }
+
+    }
+
+    public synchronized void remove(GObject var1) {
+        this.contents.remove(var1);
+        var1.setParent((GContainer)null);
+        if (this.enabledList != null) {
+            this.enabledList.remove(var1);
+        }
+
+    }
+
+    public synchronized void removeAll() {
+        this.contents.clear();
+        if (this.enabledList != null) {
+            this.enabledList.clear();
+        }
+
+    }
+
+    public int getElementCount() {
+        return this.contents.size();
+    }
+
+    public GObject getElement(int var1) {
+        return (GObject)this.contents.get(var1);
+    }
+
+    public synchronized GObject getElementAt(double var1, double var3, boolean var5) {
+        ArrayList var6 = var5 ? this.enabledList : this.contents;
+
+        for(int var7 = var6.size() - 1; var7 >= 0; --var7) {
+            GObject var8 = (GObject)var6.get(var7);
+            if (var8.contains(var1, var3)) {
+                return var8;
+            }
+        }
+
+        return null;
+    }
+
+    public synchronized void sendToFront(GObject var1) {
+        int var2 = this.contents.indexOf(var1);
+        if (var2 >= 0) {
+            this.contents.remove(var2);
+            this.contents.add(var1);
+        }
+
+    }
+
+    public synchronized void sendToBack(GObject var1) {
+        int var2 = this.contents.indexOf(var1);
+        if (var2 >= 0) {
+            this.contents.remove(var2);
+            this.contents.add(0, var1);
+        }
+
+    }
+
+    public synchronized void sendForward(GObject var1) {
+        int var2 = this.contents.indexOf(var1);
+        if (var2 >= 0) {
+            this.contents.remove(var2);
+            this.contents.add(Math.min(this.contents.size(), var2 + 1), var1);
+        }
+
+    }
+
+    public synchronized void sendBackward(GObject var1) {
+        int var2 = this.contents.indexOf(var1);
+        if (var2 >= 0) {
+            this.contents.remove(var2);
+            this.contents.add(Math.max(0, var2 - 1), var1);
+        }
+
+    }
+
+    public synchronized GRectangle getBounds() {
+        GRectangle var1 = new GRectangle();
+        int var2 = this.contents.size();
+
+        for(int var3 = 0; var3 < var2; ++var3) {
+            if (var3 == 0) {
+                var1 = new GRectangle(((GObject)this.contents.get(var3)).getBounds());
+            } else {
+                var1.add(((GObject)this.contents.get(var3)).getBounds());
+            }
+        }
+
+        return var1;
+    }
+
+    public synchronized boolean contains(double var1, double var3) {
+        int var5 = this.contents.size();
+
+        for(int var6 = 0; var6 < var5; ++var6) {
+            if (((GObject)this.contents.get(var6)).contains(var1, var3)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public synchronized void mapPaint(Graphics var1) {
+        int var2 = this.contents.size();
+
+        for(int var3 = 0; var3 < var2; ++var3) {
+            ((GObject)this.contents.get(var3)).paintObject(var1);
+        }
+
+    }
+
+    public synchronized boolean areMouseListenersEnabled() {
+        int var1 = this.contents.size();
+
+        for(int var2 = 0; var2 < var1; ++var2) {
+            GObject var3 = (GObject)this.contents.get(var2);
+            if (var3.areMouseListenersEnabled()) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public synchronized void updateEnabledList() {
+        this.enabledList.clear();
+        int var1 = this.contents.size();
+
+        for(int var2 = 0; var2 < var1; ++var2) {
+            GObject var3 = (GObject)this.contents.get(var2);
+            if (var3.areMouseListenersEnabled()) {
+                this.enabledList.add(var3);
+            }
+        }
+
+    }
+}
