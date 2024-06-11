@@ -1,0 +1,213 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util.concurent;
+
+import java.time.Duration;
+import acm.util.Objects;
+
+public enum TimeUnit {
+    NANOSECONDS(1L),
+    MICROSECONDS(1000L),
+    MILLISECONDS(1000000L),
+    SECONDS(1000000000L),
+    MINUTES(60000000000L),
+    HOURS(3600000000000L),
+    DAYS(86400000000000L);
+
+    private static final long NANO_SCALE = 1L;
+    private static final long MICRO_SCALE = 1000L;
+    private static final long MILLI_SCALE = 1000000L;
+    private static final long SECOND_SCALE = 1000000000L;
+    private static final long MINUTE_SCALE = 60000000000L;
+    private static final long HOUR_SCALE = 3600000000000L;
+    private static final long DAY_SCALE = 86400000000000L;
+    private final long scale;
+    private final long maxNanos;
+    private final long maxMicros;
+    private final long maxMillis;
+    private final long maxSecs;
+    private final long microRatio;
+    private final int milliRatio;
+    private final int secRatio;
+
+    private TimeUnit(long param3) {
+        this.scale = param3;
+        this.maxNanos = 9223372036854775807L / param3;
+        long ur = param3 >= 1000L ? param3 / 1000L : 1000L / param3;
+        this.microRatio = ur;
+        this.maxMicros = 9223372036854775807L / ur;
+        long mr = param3 >= 1000000L ? param3 / 1000000L : 1000000L / param3;
+        this.milliRatio = (int)mr;
+        this.maxMillis = 9223372036854775807L / mr;
+        long sr = param3 >= 1000000000L ? param3 / 1000000000L : 1000000000L / param3;
+        this.secRatio = (int)sr;
+        this.maxSecs = 9223372036854775807L / sr;
+    }
+
+    private static long cvt(long d, long dst, long src) {
+        if (src == dst) {
+            return d;
+        } else if (src < dst) {
+            return d / (dst / src);
+        } else {
+            long r;
+            long m;
+            if (d > (m = 9223372036854775807L / (r = src / dst))) {
+                return 9223372036854775807L;
+            } else {
+                return d < -m ? -9223372036854775808L : d * r;
+            }
+        }
+    }
+
+    public long convert(long sourceDuration, TimeUnit sourceUnit) {
+        switch(this.ordinal()) {
+            case 0:
+                return sourceUnit.toNanos(sourceDuration);
+            case 1:
+                return sourceUnit.toMicros(sourceDuration);
+            case 2:
+                return sourceUnit.toMillis(sourceDuration);
+            case 3:
+                return sourceUnit.toSeconds(sourceDuration);
+            default:
+                return cvt(sourceDuration, this.scale, sourceUnit.scale);
+        }
+    }
+
+    public long convert(Duration duration) {
+        long secs = duration.getSeconds();
+        int nano = duration.getNano();
+        if (secs < 0L && nano > 0) {
+            ++secs;
+            nano -= 1000000000;
+        }
+
+        long nanoVal;
+        if (this == NANOSECONDS) {
+            nanoVal = (long)nano;
+        } else {
+            long s;
+            if ((s = this.scale) >= 1000000000L) {
+                if (this == SECONDS) {
+                    return secs;
+                }
+
+                return secs / (long)this.secRatio;
+            }
+
+            nanoVal = (long)nano / s;
+        }
+
+        long val = secs * (long)this.secRatio + nanoVal;
+        return (secs >= this.maxSecs || secs <= -this.maxSecs) && (secs != this.maxSecs || val <= 0L) && (secs != -this.maxSecs || val >= 0L) ? (secs > 0L ? 9223372036854775807L : -9223372036854775808L) : val;
+    }
+
+    public long toNanos(long duration) {
+        long s;
+        if ((s = this.scale) == 1L) {
+            return duration;
+        } else {
+            long m;
+            if (duration > (m = this.maxNanos)) {
+                return 9223372036854775807L;
+            } else {
+                return duration < -m ? -9223372036854775808L : duration * s;
+            }
+        }
+    }
+
+    public long toMicros(long duration) {
+        long s;
+        if ((s = this.scale) <= 1000L) {
+            return s == 1000L ? duration : duration / this.microRatio;
+        } else {
+            long m;
+            if (duration > (m = this.maxMicros)) {
+                return 9223372036854775807L;
+            } else {
+                return duration < -m ? -9223372036854775808L : duration * this.microRatio;
+            }
+        }
+    }
+
+    public long toMillis(long duration) {
+        long s;
+        if ((s = this.scale) <= 1000000L) {
+            return s == 1000000L ? duration : duration / (long)this.milliRatio;
+        } else {
+            long m;
+            if (duration > (m = this.maxMillis)) {
+                return 9223372036854775807L;
+            } else {
+                return duration < -m ? -9223372036854775808L : duration * (long)this.milliRatio;
+            }
+        }
+    }
+
+    public long toSeconds(long duration) {
+        long s;
+        if ((s = this.scale) <= 1000000000L) {
+            return s == 1000000000L ? duration : duration / (long)this.secRatio;
+        } else {
+            long m;
+            if (duration > (m = this.maxSecs)) {
+                return 9223372036854775807L;
+            } else {
+                return duration < -m ? -9223372036854775808L : duration * (long)this.secRatio;
+            }
+        }
+    }
+
+    public long toMinutes(long duration) {
+        return cvt(duration, 60000000000L, this.scale);
+    }
+
+    public long toHours(long duration) {
+        return cvt(duration, 3600000000000L, this.scale);
+    }
+
+    public long toDays(long duration) {
+        return cvt(duration, 86400000000000L, this.scale);
+    }
+
+    private int excessNanos(long d, long m) {
+        long s;
+        if ((s = this.scale) == 1L) {
+            return (int)(d - m * 1000000L);
+        } else {
+            return s == 1000L ? (int)(d * 1000L - m * 1000000L) : 0;
+        }
+    }
+
+    public void timedWait(Object obj, long timeout) throws InterruptedException {
+        if (timeout > 0L) {
+            long ms = this.toMillis(timeout);
+            int ns = this.excessNanos(timeout, ms);
+            obj.wait(ms, ns);
+        }
+
+    }
+
+    public void timedJoin(Thread thread, long timeout) throws InterruptedException {
+        if (timeout > 0L) {
+            long ms = this.toMillis(timeout);
+            int ns = this.excessNanos(timeout, ms);
+            thread.join(ms, ns);
+        }
+
+    }
+
+    public void sleep(long timeout) throws InterruptedException {
+        if (timeout > 0L) {
+            long ms = this.toMillis(timeout);
+            int ns = this.excessNanos(timeout, ms);
+            Thread.sleep(ms, ns);
+        }
+
+    }
+
+}
