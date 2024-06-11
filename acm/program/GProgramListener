@@ -1,0 +1,153 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.graphics.GPoint;
+import acm.util.ErrorException;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.lang.reflect.Method;
+
+class GProgramListener implements MouseListener, MouseMotionListener {
+    private GraphicsProgram myProgram;
+    private Method mousePressedHook;
+    private Method mouseReleasedHook;
+    private Method mouseClickedHook;
+    private Method mouseMovedHook;
+    private Method mouseDraggedHook;
+    private boolean clickFlag;
+
+    public GProgramListener(GraphicsProgram var1) {
+        this.myProgram = var1;
+
+        try {
+            Class var2 = var1.getClass();
+            Class[] var3 = new Class[]{Class.forName("acm.graphics.GPoint")};
+
+            try {
+                this.mousePressedHook = var2.getMethod("mousePressed", var3);
+            } catch (NoSuchMethodException var9) {
+            }
+
+            try {
+                this.mouseReleasedHook = var2.getMethod("mouseReleased", var3);
+            } catch (NoSuchMethodException var8) {
+            }
+
+            try {
+                this.mouseClickedHook = var2.getMethod("mouseClicked", var3);
+            } catch (NoSuchMethodException var7) {
+            }
+
+            try {
+                this.mouseMovedHook = var2.getMethod("mouseMoved", var3);
+            } catch (NoSuchMethodException var6) {
+            }
+
+            try {
+                this.mouseDraggedHook = var2.getMethod("mouseDragged", var3);
+            } catch (NoSuchMethodException var5) {
+            }
+
+        } catch (Exception var10) {
+            throw new ErrorException(var10);
+        }
+    }
+
+    public boolean needsMouseMotionListeners() {
+        return this.mouseMovedHook != null || this.mouseDraggedHook != null;
+    }
+
+    public void mouseClicked(MouseEvent var1) {
+        if (this.mouseClickedHook != null) {
+            Object[] var2 = new Object[]{new GPoint((double)var1.getX(), (double)var1.getY())};
+
+            try {
+                this.mouseClickedHook.invoke(this.myProgram, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+
+        this.signalClickOccurred();
+    }
+
+    public void mousePressed(MouseEvent var1) {
+        if (this.mousePressedHook != null) {
+            Object[] var2 = new Object[]{new GPoint((double)var1.getX(), (double)var1.getY())};
+
+            try {
+                this.mousePressedHook.invoke(this.myProgram, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+
+    }
+
+    public void mouseReleased(MouseEvent var1) {
+        if (this.mouseReleasedHook != null) {
+            Object[] var2 = new Object[]{new GPoint((double)var1.getX(), (double)var1.getY())};
+
+            try {
+                this.mouseReleasedHook.invoke(this.myProgram, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+
+    }
+
+    public void mouseEntered(MouseEvent var1) {
+    }
+
+    public void mouseExited(MouseEvent var1) {
+    }
+
+    public void mouseMoved(MouseEvent var1) {
+        if (this.mouseMovedHook != null) {
+            Object[] var2 = new Object[]{new GPoint((double)var1.getX(), (double)var1.getY())};
+
+            try {
+                this.mouseMovedHook.invoke(this.myProgram, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+
+    }
+
+    public void mouseDragged(MouseEvent var1) {
+        if (this.mouseDraggedHook != null) {
+            Object[] var2 = new Object[]{new GPoint((double)var1.getX(), (double)var1.getY())};
+
+            try {
+                this.mouseDraggedHook.invoke(this.myProgram, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+
+    }
+
+    public synchronized void waitForClick() {
+        this.clickFlag = false;
+
+        while(!this.clickFlag) {
+            try {
+                this.wait();
+            } catch (InterruptedException var2) {
+            }
+        }
+
+    }
+
+    private synchronized void signalClickOccurred() {
+        this.clickFlag = true;
+        this.notifyAll();
+    }
+}
