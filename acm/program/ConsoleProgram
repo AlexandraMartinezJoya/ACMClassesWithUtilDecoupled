@@ -1,0 +1,46 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.io.IOConsole;
+import acm.util.JTFTools;
+import java.awt.Font;
+
+public abstract class ConsoleProgram extends Program {
+    public ConsoleProgram() {
+        this.add(this.getConsole(), "Center");
+        this.validate();
+    }
+
+    public void run() {
+    }
+
+    public void init() {
+    }
+
+    public void setFont(String var1) {
+        IOConsole var2 = this.getConsole();
+        if (var2 != null) {
+            var2.setFont(var1);
+            super.setFont(var2.getFont());
+        }
+
+    }
+
+    public void setFont(Font var1) {
+        IOConsole var2 = this.getConsole();
+        var1 = JTFTools.getStandardFont(var1);
+        if (var2 != null) {
+            var2.setFont(var1);
+        }
+
+        super.setFont(var1);
+    }
+
+    protected IOConsole createConsole() {
+        return new IOConsole();
+    }
+}
