@@ -1,0 +1,240 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.util.ErrorException;
+import acm.util.JTFTools;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.URL;
+import java.util.HashMap;
+
+class CommandLineProgramLoader extends ClassLoader {
+    private static final int CONSTANT_Utf8 = 1;
+    private static final int CONSTANT_Integer = 3;
+    private static final int CONSTANT_Float = 4;
+    private static final int CONSTANT_Long = 5;
+    private static final int CONSTANT_Double = 6;
+    private static final int CONSTANT_Class = 7;
+    private static final int CONSTANT_String = 8;
+    private static final int CONSTANT_Fieldref = 9;
+    private static final int CONSTANT_Methodref = 10;
+    private static final int CONSTANT_InterfaceMethodref = 11;
+    private static final int CONSTANT_NameAndType = 12;
+    private HashMap<Integer, Integer> classTable;
+    private ClassLoader realLoader;
+    private String targetName;
+    private int superclassOffset;
+
+    public CommandLineProgramLoader(String var1) {
+        this.targetName = var1;
+
+        try {
+            Class var2 = Class.forName("java.lang.ClassLoader");
+            Method var3 = var2.getMethod("getSystemClassLoader");
+            this.realLoader = (ClassLoader)var3.invoke((Object)null);
+        } catch (Exception var4) {
+            throw new ErrorException(var4);
+        }
+    }
+
+    public Class<?> loadClass(String var1, boolean var2) throws ClassNotFoundException {
+        if (var1.equals(this.targetName)) {
+            InputStream var3 = this.getResourceAsStream(var1 + ".class");
+            this.superclassOffset = this.findSuperclassOffset(var3);
+            var3 = this.getResourceAsStream(var1 + ".class");
+            byte[] var4 = this.patchClassData(var3);
+            return this.defineClass(var1, var4, 0, var4.length);
+        } else {
+            return this.realLoader.loadClass(var1);
+        }
+    }
+
+    public InputStream getResourceAsStream(String var1) {
+        return this.realLoader.getResourceAsStream(var1);
+    }
+
+    public URL getResource(String var1) {
+        return this.realLoader.getResource(var1);
+    }
+
+    private byte[] patchClassData(InputStream var1) {
+        try {
+            ByteArrayOutputStream var2 = new ByteArrayOutputStream();
+            JTFTools.copyBytes(var1, var2, 8L);
+            int var3 = var1.read() << 8 | var1.read();
+            var2.write(var3 >> 8);
+            var2.write(var3 & 255);
+
+            int var4;
+            for(var4 = 1; var4 < var3; ++var4) {
+                int var5 = var1.read();
+                var2.write(var5);
+                if (JTFTools.testDebugOption("constants")) {
+                    System.out.println(var4 + ": " + getConstantTypeName(var5));
+                }
+
+                switch(var5) {
+                case 1:
+                    int var6;
+                    if (var4 == this.superclassOffset) {
+                        var6 = var1.read() << 8 | var1.read();
+                        var1.skip((long)var6);
+                        String var7 = "acm/program/CommandLineProgram";
+                        var6 = var7.length();
+                        var2.write(var6 >> 8);
+                        var2.write(var6 & 255);
+
+                        for(int var8 = 0; var8 < var6; ++var8) {
+                            var2.write((byte)var7.charAt(var8));
+                        }
+                    } else {
+                        var6 = var1.read() << 8 | var1.read();
+                        var2.write(var6 >> 8);
+                        var2.write(var6 & 255);
+                        JTFTools.copyBytes(var1, var2, (long)var6);
+                    }
+                case 2:
+                default:
+                    break;
+                case 3:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                    break;
+                case 4:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                    break;
+                case 5:
+                    JTFTools.copyBytes(var1, var2, 8L);
+                    ++var4;
+                    break;
+                case 6:
+                    JTFTools.copyBytes(var1, var2, 8L);
+                    ++var4;
+                    break;
+                case 7:
+                    JTFTools.copyBytes(var1, var2, 2L);
+                    break;
+                case 8:
+                    JTFTools.copyBytes(var1, var2, 2L);
+                    break;
+                case 9:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                    break;
+                case 10:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                    break;
+                case 11:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                    break;
+                case 12:
+                    JTFTools.copyBytes(var1, var2, 4L);
+                }
+            }
+
+            while(true) {
+                var4 = var1.read();
+                if (var4 == -1) {
+                    return var2.toByteArray();
+                }
+
+                var2.write(var4);
+            }
+        } catch (IOException var9) {
+            throw new ErrorException(var9);
+        }
+    }
+
+    private int findSuperclassOffset(InputStream var1) {
+        this.classTable = new HashMap();
+
+        try {
+            var1.skip(8L);
+            int var2 = var1.read() << 8 | var1.read();
+            var2 += 2;
+
+            for(int var3 = 1; var3 < var2 - 2; ++var3) {
+                int var4 = var1.read();
+                switch(var4) {
+                case 1:
+                    int var6 = var1.read() << 8 | var1.read();
+                    var1.skip((long)var6);
+                case 2:
+                default:
+                    break;
+                case 3:
+                    var1.skip(4L);
+                    break;
+                case 4:
+                    var1.skip(4L);
+                    break;
+                case 5:
+                    var1.skip(8L);
+                    ++var3;
+                    break;
+                case 6:
+                    var1.skip(8L);
+                    ++var3;
+                    break;
+                case 7:
+                    int var5 = var1.read() << 8 | var1.read();
+                    this.classTable.put(new Integer(var3), new Integer(var5));
+                    break;
+                case 8:
+                    var1.skip(2L);
+                    break;
+                case 9:
+                    var1.skip(4L);
+                    break;
+                case 10:
+                    var1.skip(4L);
+                    break;
+                case 11:
+                    var1.skip(4L);
+                    break;
+                case 12:
+                    var1.skip(4L);
+                }
+            }
+
+            var1.skip(4L);
+            return (Integer)this.classTable.get(new Integer(var1.read() << 8 | var1.read()));
+        } catch (IOException var7) {
+            throw new ErrorException(var7);
+        }
+    }
+
+    private static String getConstantTypeName(int var0) {
+        switch(var0) {
+        case 1:
+            return "Utf8";
+        case 2:
+        default:
+            return "Type[" + var0 + "]";
+        case 3:
+            return "Integer";
+        case 4:
+            return "Float";
+        case 5:
+            return "Long";
+        case 6:
+            return "Double";
+        case 7:
+            return "Class";
+        case 8:
+            return "String";
+        case 9:
+            return "Fieldref";
+        case 10:
+            return "Methodref";
+        case 11:
+            return "InterfaceMethodref";
+        case 12:
+            return "NameAndType";
+        }
+    }
+}
