@@ -1,0 +1,553 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.io;
+
+import acm.program.ProgramMenuBar;
+import acm.util.ErrorException;
+import acm.util.JTFTools;
+import acm.util.Platform;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.PrintJob;
+import java.awt.event.ActionEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.util.Iterator;
+import java.util.Properties;
+import javax.swing.JMenuItem;
+
+public class IOConsole extends Container implements IOModel {
+    public static final IOConsole SYSTEM_CONSOLE = new SystemConsole();
+    protected static final Font DEFAULT_FONT = new Font("Monospaced", 0, 12);
+    protected static final String LINE_SEPARATOR = System.getProperty("line.separator");
+    protected static final int MINIMUM_CONSOLE_WIDTH = 50;
+    protected static final int MINIMUM_CONSOLE_HEIGHT = 40;
+    private static final String[] CONSOLE_MENU_ACTIONS = new String[]{"Save", "Save As", "Print Console", "Script", "Cut", "Copy", "Paste", "Select All"};
+    private ConsoleModel consoleModel = this.createConsoleModel();
+    private boolean exceptionOnError;
+    private Color inputColor;
+    private int inputStyle;
+    private Color errorColor;
+    private int errorStyle;
+    private BufferedReader reader;
+    private PrintWriter writer;
+    private File file;
+    private ProgramMenuBar menuBar;
+
+    public IOConsole() {
+        this.consoleModel.setConsole(this);
+        this.setBackground(Color.WHITE);
+        this.setInputColor(Color.BLUE);
+        this.setInputStyle(1);
+        this.setErrorColor(Color.RED);
+        this.setErrorStyle(1);
+        this.setFont(JTFTools.getStandardFont(DEFAULT_FONT));
+        Component var1 = this.consoleModel.getConsolePane();
+        if (var1 != null) {
+            this.setLayout(new BorderLayout());
+            this.add(var1, "Center");
+        }
+
+        this.reader = null;
+        this.writer = null;
+        this.exceptionOnError = false;
+    }
+
+    public void clear() {
+        this.consoleModel.clear();
+    }
+
+    public void print(String var1) {
+        this.getWriter().print(var1);
+    }
+
+    public final void print(boolean var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(char var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(double var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(float var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(int var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(long var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(Object var1) {
+        this.print("" + var1);
+    }
+
+    public void println() {
+        this.getWriter().println();
+    }
+
+    public void println(String var1) {
+        this.getWriter().println(var1);
+    }
+
+    public final void println(boolean var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(char var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(double var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(float var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(int var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(long var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(Object var1) {
+        this.println("" + var1);
+    }
+
+    public void showErrorMessage(String var1) {
+        this.consoleModel.print(var1, 2);
+        this.consoleModel.print("\n", 2);
+    }
+
+    public final String readLine() {
+        return this.readLine((String)null);
+    }
+
+    public String readLine(String var1) {
+        if (var1 != null) {
+            this.print(var1);
+        }
+
+        this.consoleModel.requestFocus();
+
+        try {
+            String var2 = this.getReader().readLine();
+            return var2;
+        } catch (IOException var3) {
+            throw new ErrorException(var3);
+        }
+    }
+
+    public final int readInt() {
+        return this.readInt((String)null, -2147483648, 2147483647);
+    }
+
+    public final int readInt(int var1, int var2) {
+        return this.readInt((String)null, var1, var2);
+    }
+
+    public final int readInt(String var1) {
+        return this.readInt(var1, -2147483648, 2147483647);
+    }
+
+    public int readInt(String var1, int var2, int var3) {
+        String var4 = null;
+
+        while(true) {
+            String var5 = this.readLine(var1);
+
+            try {
+                int var6 = Integer.parseInt(var5);
+                if (var6 >= var2 && var6 <= var3) {
+                    return var6;
+                }
+
+                var4 = "Value is outside the range [" + var2 + ":" + var3 + "]";
+            } catch (NumberFormatException var7) {
+                var4 = "Illegal numeric format";
+            }
+
+            this.showErrorMessage(var4);
+            if (var1 == null) {
+                var1 = "Retry: ";
+            }
+        }
+    }
+
+    public final double readDouble() {
+        return this.readDouble((String)null, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public final double readDouble(double var1, double var3) {
+        return this.readDouble((String)null, var1, var3);
+    }
+
+    public final double readDouble(String var1) {
+        return this.readDouble(var1, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public double readDouble(String var1, double var2, double var4) {
+        String var6 = null;
+
+        while(true) {
+            String var7 = this.readLine(var1);
+
+            try {
+                double var8 = Double.valueOf(var7);
+                if (var8 >= var2 && var8 <= var4) {
+                    return var8;
+                }
+
+                var6 = "Value is outside the range [" + var2 + ":" + var4 + "]";
+            } catch (NumberFormatException var10) {
+                var6 = "Illegal numeric format";
+            }
+
+            this.showErrorMessage(var6);
+            if (var1 == null) {
+                var1 = "Retry: ";
+            }
+        }
+    }
+
+    public final boolean readBoolean() {
+        return this.readBoolean((String)null);
+    }
+
+    public final boolean readBoolean(String var1) {
+        return this.readBoolean(var1, "true", "false");
+    }
+
+    public boolean readBoolean(String var1, String var2, String var3) {
+        while(true) {
+            String var4 = this.readLine(var1);
+            if (var4 == null) {
+                throw new ErrorException("End of file encountered");
+            }
+
+            if (var4.equalsIgnoreCase(var2)) {
+                return true;
+            }
+
+            if (var4.equalsIgnoreCase(var3)) {
+                return false;
+            }
+
+            if (this.exceptionOnError) {
+                throw new ErrorException("Illegal boolean format");
+            }
+
+            this.showErrorMessage("Illegal boolean format");
+            if (var1 == null) {
+                var1 = "Retry: ";
+            }
+        }
+    }
+
+    public BufferedReader getReader() {
+        if (this.reader == null) {
+            this.reader = new BufferedReader(new ConsoleReader(this.consoleModel));
+        }
+
+        return this.reader;
+    }
+
+    public PrintWriter getWriter() {
+        if (this.writer == null) {
+            this.writer = new PrintWriter(new ConsoleWriter(this.consoleModel));
+        }
+
+        return this.writer;
+    }
+
+    public void setExceptionOnError(boolean var1) {
+        this.exceptionOnError = var1;
+    }
+
+    public boolean getExceptionOnError() {
+        return this.exceptionOnError;
+    }
+
+    public void setInputStyle(int var1) {
+        this.inputStyle = var1;
+        this.consoleModel.setInputStyle(var1);
+    }
+
+    public int getInputStyle() {
+        return this.inputStyle;
+    }
+
+    public void setInputColor(Color var1) {
+        this.inputColor = var1;
+        this.consoleModel.setInputColor(var1);
+    }
+
+    public Color getInputColor() {
+        return this.inputColor;
+    }
+
+    public void setErrorStyle(int var1) {
+        this.errorStyle = var1;
+        this.consoleModel.setErrorStyle(var1);
+    }
+
+    public int getErrorStyle() {
+        return this.errorStyle;
+    }
+
+    public void setErrorColor(Color var1) {
+        this.errorColor = var1;
+        this.consoleModel.setErrorColor(var1);
+    }
+
+    public Color getErrorColor() {
+        return this.errorColor;
+    }
+
+    public void setFont(String var1) {
+        this.setFont(JTFTools.decodeFont(var1, this.getFont()));
+    }
+
+    public void setInputScript(BufferedReader var1) {
+        this.consoleModel.setInputScript(var1);
+    }
+
+    public BufferedReader getInputScript() {
+        return this.consoleModel.getInputScript();
+    }
+
+    public void cut() {
+        this.consoleModel.cut();
+    }
+
+    public void copy() {
+        this.consoleModel.copy();
+    }
+
+    public void paste() {
+        this.consoleModel.paste();
+    }
+
+    public void selectAll() {
+        this.consoleModel.selectAll();
+    }
+
+    public void save() {
+        FileWriter var1 = null;
+
+        while(var1 == null) {
+            try {
+                if (this.file == null) {
+                    Frame var2 = JTFTools.getEnclosingFrame(this);
+                    if (var2 == null) {
+                        return;
+                    }
+
+                    String var7 = System.getProperty("user.dir");
+                    FileDialog var4 = new FileDialog(var2, "Save Console As", 1);
+                    var4.setDirectory(var7);
+                    var4.setVisible(true);
+                    String var5 = var4.getFile();
+                    if (var5 == null) {
+                        return;
+                    }
+
+                    this.file = new File(var4.getDirectory(), var5);
+                }
+
+                var1 = new FileWriter(this.file);
+                this.save(var1);
+                var1.close();
+                Platform.setFileTypeAndCreator(this.file, "TEXT", "ttxt");
+            } catch (IOException var6) {
+                IODialog var3 = new IODialog(this);
+                var3.showErrorMessage(var6.getMessage());
+            }
+        }
+
+    }
+
+    public void saveAs() {
+        this.file = null;
+        this.save();
+    }
+
+    public void save(Writer var1) {
+        try {
+            var1.write(this.consoleModel.getText());
+        } catch (IOException var3) {
+            throw new ErrorException(var3);
+        }
+    }
+
+    public void printConsole() {
+        Frame var1 = JTFTools.getEnclosingFrame(this);
+        if (var1 != null) {
+            PrintJob var2 = this.getToolkit().getPrintJob(var1, "Console", (Properties)null);
+            if (var2 != null) {
+                this.printConsole(var2);
+                var2.end();
+            }
+        }
+    }
+
+    public void printConsole(PrintJob var1) {
+        this.consoleModel.print(var1);
+    }
+
+    public void script() {
+        Frame var1 = JTFTools.getEnclosingFrame(this);
+        FileDialog var2 = new FileDialog(var1, "Input Script", 0);
+        var2.setDirectory(System.getProperty("user.dir"));
+        var2.setVisible(true);
+        String var3 = var2.getDirectory();
+        String var4 = var2.getFile();
+        if (var4 != null) {
+            try {
+                FileReader var5 = new FileReader(new File(new File(var3), var4));
+                this.setInputScript(new BufferedReader(var5));
+            } catch (IOException var6) {
+                throw new ErrorException(var6);
+            }
+        }
+
+    }
+
+    public void setMenuBar(ProgramMenuBar var1) {
+        this.menuBar = var1;
+        this.consoleModel.setMenuBar(var1);
+    }
+
+    public ProgramMenuBar getMenuBar() {
+        return this.menuBar;
+    }
+
+    public boolean menuAction(ActionEvent var1) {
+        String var2 = var1.getActionCommand();
+        if (var2.equals("Cut")) {
+            this.cut();
+            return true;
+        } else if (var2.equals("Copy")) {
+            this.copy();
+            return true;
+        } else if (var2.equals("Paste")) {
+            this.paste();
+            return true;
+        } else if (var2.equals("Select All")) {
+            this.selectAll();
+            return true;
+        } else if (var2.equals("Save")) {
+            this.save();
+            return true;
+        } else if (var2.equals("Save As")) {
+            this.saveAs();
+            return true;
+        } else if (var2.equals("Script")) {
+            this.script();
+            return true;
+        } else if (var2.equals("Print Console")) {
+            this.printConsole();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public boolean isConsoleMenuItem(JMenuItem var1) {
+        String var2 = var1.getActionCommand();
+        if (var2 == null) {
+            return false;
+        } else {
+            for(int var3 = 0; var3 < CONSOLE_MENU_ACTIONS.length; ++var3) {
+                if (var2.equals(CONSOLE_MENU_ACTIONS[var3])) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
+    public void updateMenuBar(ProgramMenuBar var1) {
+        Iterator var2 = var1.iterator();
+
+        while(var2.hasNext()) {
+            JMenuItem var3 = (JMenuItem)var2.next();
+            if (this.isConsoleMenuItem(var3)) {
+                var3.setEnabled(true);
+            } else {
+                var3.setEnabled(!var1.isFocusedItem(var3));
+            }
+        }
+
+    }
+
+    public void setBackground(Color var1) {
+        Component var2 = this.consoleModel.getTextPane();
+        if (var2 != null) {
+            var2.setBackground(var1);
+        }
+
+        super.setBackground(var1);
+    }
+
+    public void setForeground(Color var1) {
+        Component var2 = this.consoleModel.getTextPane();
+        if (var2 != null) {
+            var2.setForeground(var1);
+        }
+
+        super.setForeground(var1);
+    }
+
+    public void setFont(Font var1) {
+        var1 = JTFTools.getStandardFont(var1);
+        Component var2 = this.consoleModel.getTextPane();
+        if (var2 != null) {
+            var2.setFont(var1);
+        }
+
+        super.setFont(var1);
+    }
+
+    public void requestFocus() {
+        this.consoleModel.requestFocus();
+    }
+
+    public Dimension getPreferredSize() {
+        return this.getMinimumSize();
+    }
+
+    public Dimension getMinimumSize() {
+        return new Dimension(50, 40);
+    }
+
+    protected ConsoleModel createConsoleModel() {
+        return new StandardConsoleModel();
+    }
+}
