@@ -1,0 +1,22 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.io.IODialog;
+
+public abstract class DialogProgram extends Program {
+    public DialogProgram() {
+        IODialog var1 = this.getDialog();
+        this.setInputModel(var1);
+        this.setOutputModel(var1);
+    }
+
+    public void run() {
+    }
+
+    public void init() {
+    }
+}
