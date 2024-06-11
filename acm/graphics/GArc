@@ -1,0 +1,237 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.Rectangle;
+
+public class GArc extends GObject implements GFillable, GScalable {
+    public static final double ARC_TOLERANCE = 2.5D;
+    private double frameWidth;
+    private double frameHeight;
+    private double arcStart;
+    private double arcSweep;
+    private Color fillColor;
+    private boolean isFilled;
+    private boolean isRenderer;
+    private ArcRenderer renderer;
+    static final long serialVersionUID = 1L;
+
+    public GArc(double var1, double var3, double var5, double var7) {
+        this(0.0D, 0.0D, var1, var3, var5, var7);
+    }
+
+    public GArc(double var1, double var3, double var5, double var7, double var9, double var11) {
+        this.frameWidth = var5;
+        this.frameHeight = var7;
+        this.arcStart = var9;
+        this.arcSweep = var11;
+        this.setLocation(var1, var3);
+        this.renderer = new ArcRenderer(this);
+    }
+
+    public void setStartAngle(double var1) {
+        this.arcStart = var1;
+        this.repaint();
+    }
+
+    public double getStartAngle() {
+        return this.arcStart;
+    }
+
+    public void setSweepAngle(double var1) {
+        this.arcSweep = var1;
+        this.repaint();
+    }
+
+    public double getSweepAngle() {
+        return this.arcSweep;
+    }
+
+    public GPoint getStartPoint() {
+        return this.getArcPoint(this.arcStart);
+    }
+
+    public GPoint getEndPoint() {
+        return this.getArcPoint(this.arcStart + this.arcSweep);
+    }
+
+    public void paint(Graphics var1) {
+        Component var2 = this.getComponent();
+        if (!this.isRenderer && (!(var2 instanceof GCanvas) || ((GCanvas)var2).getNativeArcFlag())) {
+            Rectangle var3 = this.getAWTBounds();
+            int var4 = GMath.round(this.getX() + this.frameWidth / 2.0D);
+            int var5 = GMath.round(this.getY() + this.frameHeight / 2.0D);
+            int var6 = GMath.round(this.arcStart);
+            int var7 = GMath.round(this.arcSweep);
+            if (this.isFilled()) {
+                var1.setColor(this.getFillColor());
+                var1.fillArc(var3.x, var3.y, var3.width, var3.height, var6, var7);
+                var1.setColor(this.getColor());
+                var1.drawArc(var3.x, var3.y, var3.width, var3.height, var6, var7);
+                Point var8 = this.getArcPoint((double)var6).toPoint();
+                var1.drawLine(var4, var5, var8.x, var8.y);
+                Point var9 = this.getArcPoint((double)(var6 + var7)).toPoint();
+                var1.drawLine(var4, var5, var9.x, var9.y);
+            } else {
+                var1.drawArc(var3.x, var3.y, var3.width, var3.height, var6, var7);
+            }
+        } else {
+            this.renderer.draw(var1);
+        }
+
+    }
+
+    public GRectangle getBounds() {
+        double var1 = this.frameWidth / 2.0D;
+        double var3 = this.frameHeight / 2.0D;
+        double var5 = this.getX() + var1;
+        double var7 = this.getY() + var3;
+        double var9 = var5 + GMath.cosDegrees(this.arcStart) * var1;
+        double var11 = var7 - GMath.sinDegrees(this.arcStart) * var3;
+        double var13 = var5 + GMath.cosDegrees(this.arcStart + this.arcSweep) * var1;
+        double var15 = var7 - GMath.sinDegrees(this.arcStart + this.arcSweep) * var3;
+        double var17 = Math.min(var9, var13);
+        double var19 = Math.max(var9, var13);
+        double var21 = Math.min(var11, var15);
+        double var23 = Math.max(var11, var15);
+        if (this.containsAngle(0.0D)) {
+            var19 = var5 + var1;
+        }
+
+        if (this.containsAngle(90.0D)) {
+            var21 = var7 - var3;
+        }
+
+        if (this.containsAngle(180.0D)) {
+            var17 = var5 - var1;
+        }
+
+        if (this.containsAngle(270.0D)) {
+            var23 = var7 + var3;
+        }
+
+        if (this.isFilled()) {
+            var17 = Math.min(var17, var5);
+            var21 = Math.min(var21, var7);
+            var19 = Math.max(var19, var5);
+            var23 = Math.max(var23, var7);
+        }
+
+        return new GRectangle(var17, var21, var19 - var17, var23 - var21);
+    }
+
+    public boolean contains(double var1, double var3) {
+        double var5 = this.frameWidth / 2.0D;
+        double var7 = this.frameHeight / 2.0D;
+        if (var5 != 0.0D && var7 != 0.0D) {
+            double var9 = var1 - (this.getX() + var5);
+            double var11 = var3 - (this.getY() + var7);
+            double var13 = var9 * var9 / (var5 * var5) + var11 * var11 / (var7 * var7);
+            if (this.isFilled()) {
+                if (var13 > 1.0D) {
+                    return false;
+                }
+            } else {
+                double var15 = 2.5D / ((var5 + var7) / 2.0D);
+                if (Math.abs(1.0D - var13) > var15) {
+                    return false;
+                }
+            }
+
+            return this.containsAngle(GMath.toDegrees(Math.atan2(-var11, var9)));
+        } else {
+            return false;
+        }
+    }
+
+    public void setFrameRectangle(double var1, double var3, double var5, double var7) {
+        this.frameWidth = var5;
+        this.frameHeight = var7;
+        this.setLocation(var1, var3);
+    }
+
+    public final void setFrameRectangle(GRectangle var1) {
+        this.setFrameRectangle(var1.getX(), var1.getY(), var1.getWidth(), var1.getHeight());
+    }
+
+    public GRectangle getFrameRectangle() {
+        return new GRectangle(this.getX(), this.getY(), this.frameWidth, this.frameHeight);
+    }
+
+    public void scale(double var1, double var3) {
+        this.frameWidth *= var1;
+        this.frameHeight *= var3;
+        this.repaint();
+    }
+
+    public final void scale(double var1) {
+        this.scale(var1, var1);
+    }
+
+    public void setFilled(boolean var1) {
+        this.isFilled = var1;
+        this.repaint();
+    }
+
+    public boolean isFilled() {
+        return this.isFilled;
+    }
+
+    public void setFillColor(Color var1) {
+        this.fillColor = var1;
+        this.repaint();
+    }
+
+    public Color getFillColor() {
+        return this.fillColor == null ? this.getColor() : this.fillColor;
+    }
+
+    protected Rectangle getAWTBounds() {
+        return new Rectangle(GMath.round(this.getX()), GMath.round(this.getY()), GMath.round(this.frameWidth), GMath.round(this.frameHeight));
+    }
+
+    public String paramString() {
+        String var1 = super.paramString();
+        var1 = var1.substring(var1.indexOf(41) + 1);
+        GRectangle var2 = this.getFrameRectangle();
+        String var3 = "frame=(" + var2.getX() + ", " + var2.getY() + ", " + var2.getWidth() + ", " + var2.getHeight() + ")";
+        var3 = var3 + ", start=" + this.arcStart + ", sweep=" + this.arcSweep;
+        return var3 + var1;
+    }
+
+    private GPoint getArcPoint(double var1) {
+        double var3 = this.frameWidth / 2.0D;
+        double var5 = this.frameHeight / 2.0D;
+        double var7 = this.getX() + var3;
+        double var9 = this.getY() + var5;
+        return new GPoint(var7 + var3 * GMath.cosDegrees(var1), var9 - var5 * GMath.sinDegrees(var1));
+    }
+
+    private boolean containsAngle(double var1) {
+        double var3 = Math.min(this.getStartAngle(), this.getStartAngle() + this.getSweepAngle());
+        double var5 = Math.abs(this.getSweepAngle());
+        if (var5 >= 360.0D) {
+            return true;
+        } else {
+            var1 = var1 < 0.0D ? 360.0D - -var1 % 360.0D : var1 % 360.0D;
+            var3 = var3 < 0.0D ? 360.0D - -var3 % 360.0D : var3 % 360.0D;
+            if (var3 + var5 > 360.0D) {
+                return var1 >= var3 || var1 <= var3 + var5 - 360.0D;
+            } else {
+                return var1 >= var3 && var1 <= var3 + var5;
+            }
+        }
+    }
+
+    GArc(GObject var1) {
+        this.isRenderer = true;
+        this.renderer = new ArcRenderer(var1);
+    }
+}
