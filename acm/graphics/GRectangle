@@ -1,0 +1,228 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Rectangle;
+import java.io.Serializable;
+
+public class GRectangle implements Serializable {
+    private double xc;
+    private double yc;
+    private double myWidth;
+    private double myHeight;
+    static final long serialVersionUID = 1L;
+
+    public GRectangle() {
+        this(0.0D, 0.0D, 0.0D, 0.0D);
+    }
+
+    public GRectangle(double var1, double var3, double var5, double var7) {
+        this.xc = var1;
+        this.yc = var3;
+        this.myWidth = var5;
+        this.myHeight = var7;
+    }
+
+    public GRectangle(double var1, double var3) {
+        this(0.0D, 0.0D, var1, var3);
+    }
+
+    public GRectangle(GPoint var1, GDimension var2) {
+        this(var1.getX(), var1.getY(), var2.getWidth(), var2.getHeight());
+    }
+
+    public GRectangle(GPoint var1) {
+        this(var1.getX(), var1.getY(), 0.0D, 0.0D);
+    }
+
+    public GRectangle(GDimension var1) {
+        this(0.0D, 0.0D, var1.getWidth(), var1.getHeight());
+    }
+
+    public GRectangle(GRectangle var1) {
+        this(var1.xc, var1.yc, var1.myWidth, var1.myHeight);
+    }
+
+    public double getX() {
+        return this.xc;
+    }
+
+    public double getY() {
+        return this.yc;
+    }
+
+    public double getWidth() {
+        return this.myWidth;
+    }
+
+    public double getHeight() {
+        return this.myHeight;
+    }
+
+    public void setBounds(double var1, double var3, double var5, double var7) {
+        this.xc = var1;
+        this.yc = var3;
+        this.myWidth = var5;
+        this.myHeight = var7;
+    }
+
+    public void setBounds(GPoint var1, GDimension var2) {
+        this.setBounds(var1.getX(), var1.getY(), var2.getWidth(), var2.getHeight());
+    }
+
+    public void setBounds(GRectangle var1) {
+        this.setBounds(var1.xc, var1.yc, var1.myWidth, var1.myHeight);
+    }
+
+    public GRectangle getBounds() {
+        return new GRectangle(this);
+    }
+
+    public void setLocation(double var1, double var3) {
+        this.xc = var1;
+        this.yc = var3;
+    }
+
+    public void setLocation(GPoint var1) {
+        this.setLocation(var1.getX(), var1.getY());
+    }
+
+    public GPoint getLocation() {
+        return new GPoint(this.xc, this.yc);
+    }
+
+    public void translate(double var1, double var3) {
+        this.xc += var1;
+        this.yc += var3;
+    }
+
+    public void setSize(double var1, double var3) {
+        this.myWidth = var1;
+        this.myHeight = var3;
+    }
+
+    public void setSize(GDimension var1) {
+        this.setSize(var1.getWidth(), var1.getHeight());
+    }
+
+    public GDimension getSize() {
+        return new GDimension(this.myWidth, this.myHeight);
+    }
+
+    public void grow(double var1, double var3) {
+        this.xc -= var1;
+        this.yc -= var3;
+        this.myWidth += 2.0D * var1;
+        this.myHeight += 2.0D * var3;
+    }
+
+    public boolean isEmpty() {
+        return this.myWidth <= 0.0D || this.myHeight <= 0.0D;
+    }
+
+    public boolean contains(double var1, double var3) {
+        return var1 >= this.xc && var3 >= this.yc && var1 < this.xc + this.myWidth && var3 < this.yc + this.myHeight;
+    }
+
+    public boolean contains(GPoint var1) {
+        return this.contains(var1.getX(), var1.getY());
+    }
+
+    public boolean intersects(GRectangle var1) {
+        if (this.xc > var1.xc + var1.myWidth) {
+            return false;
+        } else if (this.yc > var1.yc + var1.myHeight) {
+            return false;
+        } else if (var1.xc > this.xc + this.myWidth) {
+            return false;
+        } else {
+            return !(var1.yc > this.yc + this.myHeight);
+        }
+    }
+
+    public GRectangle intersection(GRectangle var1) {
+        double var3 = Math.max(this.xc, var1.xc);
+        double var5 = Math.max(this.yc, var1.yc);
+        double var7 = Math.min(this.xc + this.myWidth, var1.xc + var1.myWidth);
+        double var9 = Math.min(this.yc + this.myHeight, var1.yc + var1.myHeight);
+        return new GRectangle(var3, var5, var7 - var3, var9 - var5);
+    }
+
+    public GRectangle union(GRectangle var1) {
+        if (this.isEmpty()) {
+            return new GRectangle(var1);
+        } else if (var1.isEmpty()) {
+            return new GRectangle(this);
+        } else {
+            double var3 = Math.min(this.xc, var1.xc);
+            double var5 = Math.min(this.yc, var1.yc);
+            double var7 = Math.max(this.xc + this.myWidth, var1.xc + var1.myWidth);
+            double var9 = Math.max(this.yc + this.myHeight, var1.yc + var1.myHeight);
+            return new GRectangle(var3, var5, var7 - var3, var9 - var5);
+        }
+    }
+
+    public void add(GRectangle var1) {
+        if (!var1.isEmpty()) {
+            if (this.isEmpty()) {
+                this.setBounds(var1);
+            } else {
+                double var2 = Math.max(this.xc + this.myWidth, var1.xc + var1.myWidth);
+                double var4 = Math.max(this.yc + this.myHeight, var1.yc + var1.myHeight);
+                this.xc = Math.min(var1.xc, this.xc);
+                this.yc = Math.min(var1.yc, this.yc);
+                this.myWidth = var2 - this.xc;
+                this.myHeight = var4 - this.yc;
+            }
+        }
+    }
+
+    public void add(double var1, double var3) {
+        if (this.isEmpty()) {
+            this.setBounds(var1, var3, 0.0D, 0.0D);
+        } else {
+            double var5 = Math.max(var1 + this.myWidth, var1);
+            double var7 = Math.max(var3 + this.myHeight, var3);
+            this.xc = Math.min(var1, this.xc);
+            this.yc = Math.min(var3, this.yc);
+            this.myWidth = var5 - this.xc;
+            this.myHeight = var7 - this.yc;
+        }
+    }
+
+    public Rectangle toRectangle() {
+        return new Rectangle((int)Math.round(this.xc), (int)Math.round(this.yc), (int)Math.round(this.myWidth), (int)Math.round(this.myHeight));
+    }
+
+    public int hashCode() {
+        int var1 = (new Float((float)this.xc)).hashCode();
+        var1 = 37 * var1 ^ (new Float((float)this.yc)).hashCode();
+        var1 = 37 * var1 ^ (new Float((float)this.myWidth)).hashCode();
+        var1 = 37 * var1 ^ (new Float((float)this.myHeight)).hashCode();
+        return var1;
+    }
+
+    public boolean equals(Object var1) {
+        if (!(var1 instanceof GRectangle)) {
+            return false;
+        } else {
+            GRectangle var2 = (GRectangle)var1;
+            if ((float)this.xc != (float)var2.xc) {
+                return false;
+            } else if ((float)this.yc != (float)var2.yc) {
+                return false;
+            } else if ((float)this.myWidth != (float)var2.myWidth) {
+                return false;
+            } else {
+                return (float)this.myHeight == (float)var2.myHeight;
+            }
+        }
+    }
+
+    public String toString() {
+        return "[" + (float)this.xc + ", " + (float)this.yc + ", " + (float)this.myWidth + "x" + (float)this.myHeight + "]";
+    }
+}
