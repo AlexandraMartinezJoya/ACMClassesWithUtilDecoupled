@@ -1,0 +1,41 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import java.awt.Component;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+
+class ProgramWindowListener implements WindowListener {
+    private Program program;
+
+    public ProgramWindowListener(Program var1) {
+        this.program = var1;
+    }
+
+    public void windowClosing(WindowEvent var1) {
+        ((Component)var1.getSource()).setVisible(false);
+        this.program.exit();
+    }
+
+    public void windowOpened(WindowEvent var1) {
+    }
+
+    public void windowClosed(WindowEvent var1) {
+    }
+
+    public void windowIconified(WindowEvent var1) {
+    }
+
+    public void windowDeiconified(WindowEvent var1) {
+    }
+
+    public void windowActivated(WindowEvent var1) {
+    }
+
+    public void windowDeactivated(WindowEvent var1) {
+    }
+}
