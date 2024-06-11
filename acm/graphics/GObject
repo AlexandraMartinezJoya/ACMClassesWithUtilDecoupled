@@ -1,0 +1,447 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.ErrorException;
+import acm.util.JTFTools;
+import java.awt.AWTEventMulticaster;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+
+public abstract class GObject implements Cloneable, Serializable {
+    private GCompound compoundParent;
+    private Color objectColor;
+    private double xc;
+    private double yc;
+    private boolean isVisible = true;
+    private boolean mouseListenersEnabled = false;
+    private transient MouseListener mouseListener;
+    private transient MouseMotionListener mouseMotionListener;
+    private transient ActionListener actionListener;
+    private transient GContainer transientParent;
+    static final long serialVersionUID = 1L;
+
+    protected GObject() {
+    }
+
+    public abstract void paint(Graphics var1);
+
+    public abstract GRectangle getBounds();
+
+    public void setLocation(double var1, double var3) {
+        this.xc = var1;
+        this.yc = var3;
+        this.repaint();
+    }
+
+    public final void setLocation(GPoint var1) {
+        this.setLocation(var1.getX(), var1.getY());
+    }
+
+    public GPoint getLocation() {
+        return new GPoint(this.xc, this.yc);
+    }
+
+    public double getX() {
+        return this.xc;
+    }
+
+    public double getY() {
+        return this.yc;
+    }
+
+    public void move(double var1, double var3) {
+        this.setLocation(this.xc + var1, this.yc + var3);
+    }
+
+    public final void movePolar(double var1, double var3) {
+        double var5 = var3 * 3.141592653589793D / 180.0D;
+        this.move(var1 * Math.cos(var5), -var1 * Math.sin(var5));
+    }
+
+    public GDimension getSize() {
+        GRectangle var1 = this.getBounds();
+        return new GDimension(var1.getWidth(), var1.getHeight());
+    }
+
+    public double getWidth() {
+        return this.getBounds().getWidth();
+    }
+
+    public double getHeight() {
+        return this.getBounds().getHeight();
+    }
+
+    public boolean contains(double var1, double var3) {
+        return this.getBounds().contains((double)GMath.round(var1), (double)GMath.round(var3));
+    }
+
+    public final boolean contains(GPoint var1) {
+        return this.contains(var1.getX(), var1.getY());
+    }
+
+    public void sendToFront() {
+        if (this.compoundParent != null) {
+            this.compoundParent.sendToFront(this);
+        } else if (this.transientParent instanceof GCanvas) {
+            ((GCanvas)this.transientParent).sendToFront(this);
+        } else if (this.transientParent != null) {
+            try {
+                Class var1 = this.transientParent.getClass();
+                Class[] var2 = new Class[]{Class.forName("acm.graphics.GObject")};
+                Object[] var3 = new Object[]{this};
+                Method var4 = var1.getMethod("sendToFront", var2);
+                if (var4 != null) {
+                    var4.invoke(this.transientParent, var3);
+                }
+            } catch (Exception var5) {
+            }
+        }
+
+        if (this.mouseListenersEnabled) {
+            this.updateEnabledList();
+        }
+
+    }
+
+    public void sendToBack() {
+        if (this.compoundParent != null) {
+            this.compoundParent.sendToBack(this);
+        } else if (this.transientParent instanceof GCanvas) {
+            ((GCanvas)this.transientParent).sendToBack(this);
+        } else if (this.transientParent != null) {
+            try {
+                Class var1 = this.transientParent.getClass();
+                Class[] var2 = new Class[]{Class.forName("acm.graphics.GObject")};
+                Object[] var3 = new Object[]{this};
+                Method var4 = var1.getMethod("sendToBack", var2);
+                if (var4 != null) {
+                    var4.invoke(this.transientParent, var3);
+                }
+            } catch (Exception var5) {
+            }
+        }
+
+        if (this.mouseListenersEnabled) {
+            this.updateEnabledList();
+        }
+
+    }
+
+    public void sendForward() {
+        if (this.compoundParent != null) {
+            this.compoundParent.sendForward(this);
+        } else if (this.transientParent instanceof GCanvas) {
+            ((GCanvas)this.transientParent).sendForward(this);
+        } else if (this.transientParent != null) {
+            try {
+                Class var1 = this.transientParent.getClass();
+                Class[] var2 = new Class[]{Class.forName("acm.graphics.GObject")};
+                Object[] var3 = new Object[]{this};
+                Method var4 = var1.getMethod("sendForward", var2);
+                if (var4 != null) {
+                    var4.invoke(this.transientParent, var3);
+                }
+            } catch (Exception var5) {
+            }
+        }
+
+        if (this.mouseListenersEnabled) {
+            this.updateEnabledList();
+        }
+
+    }
+
+    public void sendBackward() {
+        if (this.compoundParent != null) {
+            this.compoundParent.sendBackward(this);
+        } else if (this.transientParent instanceof GCanvas) {
+            ((GCanvas)this.transientParent).sendBackward(this);
+        } else if (this.transientParent != null) {
+            try {
+                Class var1 = this.transientParent.getClass();
+                Class[] var2 = new Class[]{Class.forName("acm.graphics.GObject")};
+                Object[] var3 = new Object[]{this};
+                Method var4 = var1.getMethod("sendBackward", var2);
+                if (var4 != null) {
+                    var4.invoke(this.transientParent, var3);
+                }
+            } catch (Exception var5) {
+            }
+        }
+
+        if (this.mouseListenersEnabled) {
+            this.updateEnabledList();
+        }
+
+    }
+
+    public void setColor(Color var1) {
+        this.objectColor = var1;
+        this.repaint();
+    }
+
+    public Color getColor() {
+        GObject var1;
+        GContainer var2;
+        for(var1 = this; var1.objectColor == null; var1 = (GObject)var2) {
+            var2 = var1.getParent();
+            if (!(var2 instanceof GObject)) {
+                if (var2 instanceof Component) {
+                    return ((Component)var2).getForeground();
+                }
+
+                return Color.BLACK;
+            }
+        }
+
+        return var1.objectColor;
+    }
+
+    public void setVisible(boolean var1) {
+        this.isVisible = var1;
+        this.repaint();
+    }
+
+    public boolean isVisible() {
+        return this.isVisible;
+    }
+
+    public String toString() {
+        String var1 = this.getClass().getName();
+        if (var1.startsWith("acm.graphics.")) {
+            var1 = var1.substring("acm.graphics.".length());
+        }
+
+        return var1 + "[" + this.paramString() + "]";
+    }
+
+    public GContainer getParent() {
+        return (GContainer)(this.compoundParent != null ? this.compoundParent : this.transientParent);
+    }
+
+    public void pause(double var1) {
+        JTFTools.pause(var1);
+    }
+
+    public void addMouseListener(MouseListener var1) {
+        this.mouseListener = AWTEventMulticaster.add(this.mouseListener, var1);
+        this.mouseListenersEnabled = true;
+        this.updateEnabledList();
+    }
+
+    public void removeMouseListener(MouseListener var1) {
+        this.mouseListener = AWTEventMulticaster.remove(this.mouseListener, var1);
+    }
+
+    public void addMouseMotionListener(MouseMotionListener var1) {
+        this.mouseMotionListener = AWTEventMulticaster.add(this.mouseMotionListener, var1);
+        this.mouseListenersEnabled = true;
+        this.updateEnabledList();
+    }
+
+    public void removeMouseMotionListener(MouseMotionListener var1) {
+        this.mouseMotionListener = AWTEventMulticaster.remove(this.mouseMotionListener, var1);
+    }
+
+    public void addActionListener(ActionListener var1) {
+        this.actionListener = AWTEventMulticaster.add(this.actionListener, var1);
+    }
+
+    public void removeActionListener(ActionListener var1) {
+        this.actionListener = AWTEventMulticaster.remove(this.actionListener, var1);
+    }
+
+    public void fireActionEvent(String var1) {
+        this.fireActionEvent(new ActionEvent(this, 1001, var1));
+    }
+
+    public void fireActionEvent(ActionEvent var1) {
+        if (this.actionListener != null) {
+            this.actionListener.actionPerformed(var1);
+        }
+
+    }
+
+    public void setParent(GContainer var1) {
+        if (var1 instanceof GCompound) {
+            this.compoundParent = (GCompound)var1;
+        } else {
+            this.transientParent = var1;
+        }
+
+    }
+
+    protected void fireMouseListeners(MouseEvent var1) {
+        switch(var1.getID()) {
+        case 500:
+            if (this.mouseListener != null) {
+                this.mouseListener.mouseClicked(var1);
+            }
+            break;
+        case 501:
+            if (this.mouseListener != null) {
+                this.mouseListener.mousePressed(var1);
+            }
+            break;
+        case 502:
+            if (this.mouseListener != null) {
+                this.mouseListener.mouseReleased(var1);
+            }
+            break;
+        case 503:
+            if (this.mouseMotionListener != null) {
+                this.mouseMotionListener.mouseMoved(var1);
+            }
+            break;
+        case 504:
+            if (this.mouseListener != null) {
+                this.mouseListener.mouseEntered(var1);
+            }
+            break;
+        case 505:
+            if (this.mouseListener != null) {
+                this.mouseListener.mouseExited(var1);
+            }
+            break;
+        case 506:
+            if (this.mouseMotionListener != null) {
+                this.mouseMotionListener.mouseDragged(var1);
+            }
+        }
+
+    }
+
+    protected boolean areMouseListenersEnabled() {
+        return this.mouseListenersEnabled;
+    }
+
+    protected void start() {
+        this.start((String[])null);
+    }
+
+    protected void start(String[] var1) {
+        try {
+            Class var2 = Class.forName("acm.program.GraphicsProgram");
+            Class var3 = Class.forName("acm.graphics.GObject");
+            Class[] var4 = new Class[]{var3, var1.getClass()};
+            Object[] var5 = new Object[]{this, var1};
+            Method var6 = var2.getMethod("startGraphicsProgram", var4);
+            var6.invoke((Object)null, var5);
+        } catch (Exception var7) {
+            throw new ErrorException(var7);
+        }
+    }
+
+    protected Color getObjectColor() {
+        return this.objectColor;
+    }
+
+    protected String paramString() {
+        String var1 = "";
+        if (this instanceof GResizable) {
+            GRectangle var2 = this.getBounds();
+            var1 = var1 + "bounds=(" + var2.getX() + ", " + var2.getY() + ", " + var2.getWidth() + ", " + var2.getHeight() + ")";
+        } else {
+            GPoint var3 = this.getLocation();
+            var1 = var1 + "location=(" + var3.getX() + ", " + var3.getY() + ")";
+        }
+
+        if (this.objectColor != null) {
+            var1 = var1 + ", color=" + colorName(this.objectColor);
+        }
+
+        if (this instanceof GFillable) {
+            var1 = var1 + ", filled=" + ((GFillable)this).isFilled();
+            Color var4 = ((GFillable)this).getFillColor();
+            if (var4 != null && var4 != this.objectColor) {
+                var1 = var1 + ", fillColor=" + colorName(var4);
+            }
+        }
+
+        return var1;
+    }
+
+    protected static String colorName(Color var0) {
+        if (var0.equals(Color.BLACK)) {
+            return "BLACK";
+        } else if (var0.equals(Color.BLUE)) {
+            return "BLUE";
+        } else if (var0.equals(Color.CYAN)) {
+            return "CYAN";
+        } else if (var0.equals(Color.DARK_GRAY)) {
+            return "DARK_GRAY";
+        } else if (var0.equals(Color.GRAY)) {
+            return "GRAY";
+        } else if (var0.equals(Color.GREEN)) {
+            return "GREEN";
+        } else if (var0.equals(Color.LIGHT_GRAY)) {
+            return "LIGHT_GRAY";
+        } else if (var0.equals(Color.MAGENTA)) {
+            return "MAGENTA";
+        } else if (var0.equals(Color.ORANGE)) {
+            return "ORANGE";
+        } else if (var0.equals(Color.PINK)) {
+            return "PINK";
+        } else if (var0.equals(Color.RED)) {
+            return "RED";
+        } else if (var0.equals(Color.WHITE)) {
+            return "WHITE";
+        } else {
+            return var0.equals(Color.YELLOW) ? "YELLOW" : "0x" + Integer.toString(var0.getRGB() & 16777215, 16).toUpperCase();
+        }
+    }
+
+    protected void paintObject(Graphics var1) {
+        if (this.isVisible()) {
+            Color var2 = var1.getColor();
+            if (this.objectColor != null) {
+                var1.setColor(this.objectColor);
+            }
+
+            this.paint(var1);
+            if (this.objectColor != null) {
+                var1.setColor(var2);
+            }
+
+        }
+    }
+
+    protected Component getComponent() {
+        GContainer var1;
+        for(var1 = this.getParent(); var1 instanceof GObject; var1 = ((GObject)var1).getParent()) {
+        }
+
+        return var1 instanceof Component ? (Component)var1 : null;
+    }
+
+    protected void updateEnabledList() {
+        Component var1 = this.getComponent();
+        if (var1 instanceof GCanvas) {
+            ((GCanvas)var1).updateEnabledList();
+        }
+
+    }
+
+    protected void repaint() {
+        GContainer var1;
+        for(var1 = this.getParent(); var1 instanceof GObject; var1 = ((GObject)var1).getParent()) {
+        }
+
+        if (var1 instanceof GCanvas) {
+            ((GCanvas)var1).conditionalRepaint();
+        }
+
+    }
+}
