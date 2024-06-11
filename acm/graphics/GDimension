@@ -1,0 +1,74 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Dimension;
+import java.io.Serializable;
+
+public class GDimension implements Serializable {
+    private double myWidth;
+    private double myHeight;
+    static final long serialVersionUID = 1L;
+
+    public GDimension() {
+        this(0.0D, 0.0D);
+    }
+
+    public GDimension(double var1, double var3) {
+        this.myWidth = var1;
+        this.myHeight = var3;
+    }
+
+    public GDimension(GDimension var1) {
+        this(var1.myWidth, var1.myHeight);
+    }
+
+    public GDimension(Dimension var1) {
+        this((double)var1.width, (double)var1.height);
+    }
+
+    public double getWidth() {
+        return this.myWidth;
+    }
+
+    public double getHeight() {
+        return this.myHeight;
+    }
+
+    public void setSize(double var1, double var3) {
+        this.myWidth = var1;
+        this.myHeight = var3;
+    }
+
+    public void setSize(GDimension var1) {
+        this.setSize(var1.myWidth, var1.myHeight);
+    }
+
+    public GDimension getSize() {
+        return new GDimension(this.myWidth, this.myHeight);
+    }
+
+    public Dimension toDimension() {
+        return new Dimension((int)Math.round(this.myWidth), (int)Math.round(this.myHeight));
+    }
+
+    public int hashCode() {
+        return (new Float((float)this.myWidth)).hashCode() ^ 37 * (new Float((float)this.myHeight)).hashCode();
+    }
+
+    public boolean equals(Object var1) {
+        if (!(var1 instanceof GDimension)) {
+            return false;
+        } else {
+            GDimension var2 = (GDimension)var1;
+            return (float)this.myWidth == (float)var2.myWidth && (float)this.myHeight == (float)var2.myHeight;
+        }
+    }
+
+    public String toString() {
+        return "(" + (float)this.myWidth + "x" + (float)this.myHeight + ")";
+    }
+}
