@@ -1,0 +1,512 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.io;
+
+import acm.program.ProgramMenuBar;
+import acm.util.ErrorException;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.PrintJob;
+import java.awt.event.ActionListener;
+import java.awt.event.FocusEvent;
+import java.awt.event.FocusListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import javax.swing.JScrollPane;
+import javax.swing.JTextPane;
+import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
+import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Document;
+import javax.swing.text.Element;
+import javax.swing.text.ElementIterator;
+import javax.swing.text.SimpleAttributeSet;
+import javax.swing.text.StyleConstants;
+
+class StandardConsoleModel implements KeyListener, FocusListener, ConsoleModel {
+    private static final int PRINT_MARGIN = 36;
+    private ActionListener actionListener;
+    private ConsoleOutputMonitor outputMonitor = new ConsoleOutputMonitor(this);
+    private ConsoleInputMonitor inputMonitor = new ConsoleInputMonitor(this);
+    private BufferedReader inputScript;
+    private CharacterQueue buffer;
+    private SimpleAttributeSet outputAttributes;
+    private SimpleAttributeSet inputAttributes;
+    private SimpleAttributeSet errorAttributes;
+    private JScrollPane scrollPane = new JScrollPane(22, 32);
+    private JTextPane textPane = new JTextPane();
+    private Document document;
+    private String lineSeparator;
+    private int base;
+    private boolean hasFocus;
+    private IOConsole console;
+    private ProgramMenuBar menuBar;
+
+    public StandardConsoleModel() {
+        this.textPane.addKeyListener(this);
+        this.textPane.addFocusListener(this);
+        this.scrollPane.setViewportView(this.textPane);
+        this.document = this.textPane.getDocument();
+        this.lineSeparator = System.getProperty("line.separator");
+        this.outputAttributes = new SimpleAttributeSet();
+        this.inputAttributes = new SimpleAttributeSet();
+        this.errorAttributes = new SimpleAttributeSet();
+        this.buffer = new CharacterQueue();
+        this.base = 0;
+    }
+
+    public void setConsole(IOConsole var1) {
+        this.console = var1;
+    }
+
+    public IOConsole getConsole() {
+        return this.console;
+    }
+
+    public void print(String var1, int var2) {
+        this.outputMonitor.print(var1, var2);
+    }
+
+    public String readLine() {
+        return this.inputMonitor.readLine();
+    }
+
+    public void setInputScript(BufferedReader var1) {
+        this.inputScript = var1;
+        if (this.buffer.isWaiting()) {
+            try {
+                String var2 = this.inputScript.readLine();
+                this.buffer.enqueue(var2 + "\n");
+            } catch (IOException var3) {
+                throw new ErrorException(var3);
+            }
+        }
+
+    }
+
+    public BufferedReader getInputScript() {
+        return this.inputScript;
+    }
+
+    public void clear() {
+        this.textPane.setText("");
+        this.base = 0;
+        this.buffer.clear();
+    }
+
+    public String getText() {
+        return this.textPane.getText();
+    }
+
+    public String getText(int var1, int var2) {
+        try {
+            return this.document.getText(var1, var2 - var1);
+        } catch (BadLocationException var4) {
+            throw new ErrorException(var4);
+        }
+    }
+
+    public int getLength() {
+        return this.document.getLength();
+    }
+
+    public Component getConsolePane() {
+        return this.scrollPane;
+    }
+
+    public Component getTextPane() {
+        return this.textPane;
+    }
+
+    public void cut() {
+        this.copy();
+        this.deleteSelection();
+    }
+
+    public void copy() {
+        this.textPane.copy();
+    }
+
+    public void paste() {
+        if (this.textPane.getSelectionEnd() == this.document.getLength()) {
+            int var1 = this.deleteSelection();
+            this.textPane.setSelectionStart(var1);
+            this.textPane.paste();
+            this.textPane.select(this.document.getLength(), this.document.getLength());
+            if (this.document instanceof DefaultStyledDocument) {
+                DefaultStyledDocument var2 = (DefaultStyledDocument)this.document;
+                var2.setCharacterAttributes(var1, this.textPane.getSelectionEnd() - var1, this.inputAttributes, true);
+            }
+
+        }
+    }
+
+    public void selectAll() {
+        this.textPane.selectAll();
+    }
+
+    public boolean isPointSelection() {
+        return this.textPane.getSelectionStart() == this.textPane.getSelectionEnd();
+    }
+
+    public void print(PrintJob var1) {
+        Graphics var2 = var1.getGraphics();
+        Dimension var3 = var1.getPageDimension();
+        FontMetrics var4 = this.textPane.getFontMetrics(this.textPane.getFont());
+        int var5 = var4.getHeight();
+        int var6 = var4.getAscent();
+        int var7 = 36;
+        int var8 = 36 + var6;
+        int var9 = (var3.height - 72) / var5;
+        int var10 = var9;
+        ElementIterator var11 = new ElementIterator(this.document);
+
+        while(true) {
+            Element var12;
+            do {
+                var12 = var11.next();
+                if (var12 == null) {
+                    var1.end();
+                    return;
+                }
+            } while(!var12.isLeaf());
+
+            try {
+                int var13 = var12.getEndOffset() - var12.getStartOffset();
+                this.setStyleFromAttributes(var2, var12.getAttributes());
+                var4 = var2.getFontMetrics();
+                String var14 = this.document.getText(var12.getStartOffset(), var13);
+                int var15 = 0;
+
+                while(true) {
+                    boolean var16 = false;
+                    int var17 = 1;
+                    int var18 = var14.indexOf("\n", var15);
+                    if (var18 == -1) {
+                        var18 = var14.indexOf(this.lineSeparator, var15);
+                        if (var18 == -1) {
+                            var18 = var14.length();
+                            var16 = true;
+                        } else {
+                            var17 = this.lineSeparator.length();
+                        }
+                    }
+
+                    if (var15 < var18) {
+                        String var19 = var14.substring(var15, var18);
+                        var2.drawString(var19, var7, var8);
+                        var7 += var4.stringWidth(var19);
+                    }
+
+                    if (var16) {
+                        break;
+                    }
+
+                    var15 = var18 + var17;
+                    var7 = 36;
+                    var8 += var5;
+                    --var10;
+                    if (var10 <= 0) {
+                        var2.dispose();
+                        var2 = var1.getGraphics();
+                        var8 = 36 + var6;
+                        var10 = var9;
+                    }
+                }
+            } catch (BadLocationException var20) {
+                throw new ErrorException(var20);
+            }
+        }
+    }
+
+    public void setInputStyle(int var1) {
+        if (this.getLength() != 0) {
+            throw new ErrorException("Console styles and colors cannot be changed after I/O has started.");
+        } else {
+            this.inputAttributes.addAttribute(StyleConstants.Bold, new Boolean((var1 & 1) != 0));
+            this.inputAttributes.addAttribute(StyleConstants.Italic, new Boolean((var1 & 2) != 0));
+        }
+    }
+
+    public void setInputColor(Color var1) {
+        if (this.getLength() != 0) {
+            throw new ErrorException("Console styles and colors cannot be changed after I/O has started.");
+        } else {
+            this.inputAttributes.addAttribute(StyleConstants.Foreground, var1);
+        }
+    }
+
+    public void setErrorStyle(int var1) {
+        if (this.getLength() != 0) {
+            throw new ErrorException("Console styles and colors cannot be changed after I/O has started.");
+        } else {
+            this.errorAttributes.addAttribute(StyleConstants.Bold, new Boolean((var1 & 1) != 0));
+            this.errorAttributes.addAttribute(StyleConstants.Italic, new Boolean((var1 & 2) != 0));
+        }
+    }
+
+    public void setErrorColor(Color var1) {
+        if (this.getLength() != 0) {
+            throw new ErrorException("Console styles and colors cannot be changed after I/O has started.");
+        } else {
+            this.errorAttributes.addAttribute(StyleConstants.Foreground, var1);
+        }
+    }
+
+    public void requestFocus() {
+        if (this.textPane != null) {
+            this.textPane.requestFocus();
+        }
+
+    }
+
+    public void setMenuBar(ProgramMenuBar var1) {
+        this.menuBar = var1;
+    }
+
+    public void focusGained(FocusEvent var1) {
+        this.hasFocus = true;
+        if (this.menuBar != null) {
+            if (this.actionListener == null) {
+                this.actionListener = new ConsoleActionListener(this.console);
+            }
+
+            this.menuBar.setFocusedListener(this.actionListener);
+            this.console.updateMenuBar(this.menuBar);
+        }
+
+    }
+
+    public void focusLost(FocusEvent var1) {
+        this.hasFocus = false;
+        if (this.menuBar != null) {
+            this.menuBar.setFocusedListener((ActionListener)null);
+        }
+
+    }
+
+    public void keyTyped(KeyEvent var1) {
+        if (!var1.isMetaDown() && !var1.isControlDown()) {
+            this.buffer.enqueue(var1.getKeyChar());
+            var1.consume();
+        }
+
+    }
+
+    public void keyPressed(KeyEvent var1) {
+        switch(var1.getKeyCode()) {
+        case 37:
+            this.buffer.enqueue('\u0002');
+            break;
+        case 39:
+            this.buffer.enqueue('\u0006');
+        }
+
+        if (this.menuBar != null) {
+            this.menuBar.fireAccelerator(var1);
+        }
+
+        var1.consume();
+    }
+
+    public void keyReleased(KeyEvent var1) {
+        var1.consume();
+    }
+
+    protected void printCallback(String var1, int var2) {
+        this.insert(var1, this.base, var2);
+        this.base += var1.length();
+        this.setCaretPosition(this.base);
+    }
+
+    protected String readLineCallback() {
+        this.base = this.getLength();
+        if (this.inputScript != null) {
+            String var1 = null;
+
+            try {
+                var1 = this.inputScript.readLine();
+            } catch (IOException var6) {
+                throw new ErrorException(var6);
+            }
+
+            if (var1 != null) {
+                this.insert(var1, this.base, 1);
+                this.insert("\n", this.base + var1.length(), 0);
+                this.base += var1.length() + 1;
+                return var1;
+            }
+
+            try {
+                this.inputScript.close();
+            } catch (IOException var5) {
+            }
+
+            this.inputScript = null;
+        }
+
+        this.setCaretPosition(this.base);
+
+        char var2;
+        while((var2 = this.buffer.dequeue()) != '\n' && var2 != '\r') {
+            if (this.getCaretPosition() < this.base) {
+                this.setCaretPosition(this.getLength());
+            }
+
+            int var7 = this.getSelectionStart();
+            switch(var2) {
+            case '\u0001':
+                this.selectAll();
+                var7 = -1;
+                break;
+            case '\u0002':
+                var7 = Math.max(this.getSelectionStart() - 1, this.base);
+                break;
+            case '\u0003':
+                this.copy();
+                var7 = -1;
+                break;
+            case '\u0006':
+                var7 = Math.min(this.getSelectionEnd() + 1, this.getLength());
+                break;
+            case '\b':
+            case '\u007f':
+                if (var7 == this.getSelectionEnd()) {
+                    if (var7 > this.base) {
+                        this.delete(var7 - 1, var7);
+                        --var7;
+                    }
+                } else {
+                    var7 = this.deleteSelection();
+                }
+                break;
+            case '\u0010':
+                this.console.printConsole();
+                var7 = -1;
+                break;
+            case '\u0013':
+                this.console.save();
+                var7 = -1;
+                break;
+            case '\u0016':
+                this.paste();
+                var7 = -1;
+                break;
+            case '\u0018':
+                this.cut();
+                var7 = -1;
+                break;
+            default:
+                if (var7 != this.getSelectionEnd()) {
+                    var7 = this.deleteSelection();
+                }
+
+                this.insert("" + var2, var7, 1);
+                ++var7;
+            }
+
+            if (var7 != -1) {
+                this.select(var7, var7);
+                this.setCaretPosition(var7);
+            }
+        }
+
+        int var3 = this.getLength() - this.base;
+        String var4 = this.getText(this.base, this.base + var3);
+        this.insert("\n", this.base + var3, 0);
+        this.base += var3 + 1;
+        return var4;
+    }
+
+    public boolean isCommandEnabled(String var1) {
+        if (var1 == var1) {
+        }
+
+        return this.hasFocus;
+    }
+
+    private void insert(String var1, int var2, int var3) {
+        try {
+            SimpleAttributeSet var4 = this.outputAttributes;
+            switch(var3) {
+            case 1:
+                var4 = this.inputAttributes;
+                break;
+            case 2:
+                var4 = this.errorAttributes;
+            }
+
+            this.document.insertString(var2, var1, var4);
+        } catch (BadLocationException var5) {
+        }
+
+    }
+
+    private void delete(int var1, int var2) {
+        try {
+            this.document.remove(var1, var2 - var1);
+        } catch (BadLocationException var4) {
+            throw new ErrorException(var4);
+        }
+    }
+
+    private void setCaretPosition(int var1) {
+        this.textPane.setCaretPosition(var1);
+    }
+
+    private int getCaretPosition() {
+        return this.textPane.getCaretPosition();
+    }
+
+    private void select(int var1, int var2) {
+        this.textPane.select(var1, var2);
+    }
+
+    private int getSelectionStart() {
+        return this.textPane.getSelectionStart();
+    }
+
+    private int getSelectionEnd() {
+        return this.textPane.getSelectionEnd();
+    }
+
+    private int deleteSelection() {
+        int var1 = Math.max(this.base, this.getSelectionStart());
+        int var2 = this.getSelectionEnd();
+        if (var2 <= this.base) {
+            return this.getLength();
+        } else {
+            this.delete(var1, var2);
+            return var1;
+        }
+    }
+
+    private void setStyleFromAttributes(Graphics var1, AttributeSet var2) {
+        Font var3 = this.textPane.getFont();
+        int var4 = 0;
+        if (Boolean.TRUE.equals(var2.getAttribute(StyleConstants.Bold))) {
+            var4 |= 1;
+        }
+
+        if (Boolean.TRUE.equals(var2.getAttribute(StyleConstants.Italic))) {
+            var4 |= 2;
+        }
+
+        var1.setFont(new Font(var3.getName(), var4, var3.getSize()));
+        Color var5 = (Color)var2.getAttribute(StyleConstants.Foreground);
+        if (var5 == null) {
+            var5 = this.textPane.getForeground();
+        }
+
+        var1.setColor(var5);
+    }
+}
