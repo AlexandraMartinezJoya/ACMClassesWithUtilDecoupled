@@ -1,0 +1,162 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.util.ErrorException;
+import java.applet.Applet;
+import java.applet.AppletContext;
+import java.applet.AppletStub;
+import java.applet.AudioClip;
+import java.awt.Frame;
+import java.awt.Image;
+import java.awt.image.ImageProducer;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
+
+class ProgramAppletStub implements AppletContext, AppletStub {
+    private Applet applet;
+    private Frame enclosure;
+    private boolean recursiveResizeCheck;
+
+    public ProgramAppletStub(Program var1) {
+        this.applet = var1;
+    }
+
+    public void setFrame(Frame var1) {
+        this.enclosure = var1;
+    }
+
+    public boolean isActive() {
+        return true;
+    }
+
+    public URL getDocumentBase() {
+        return this.getCodeBase();
+    }
+
+    public URL getCodeBase() {
+        try {
+            return new URL("file:" + this.getCanonicalPath("."));
+        } catch (MalformedURLException var2) {
+            throw new ErrorException("Error: Illegal document base URL");
+        }
+    }
+
+    public String getParameter(String var1) {
+        return null;
+    }
+
+    public AppletContext getAppletContext() {
+        return this;
+    }
+
+    public void appletResize(int var1, int var2) {
+        if (this.enclosure == null) {
+            if (!this.recursiveResizeCheck) {
+                this.recursiveResizeCheck = true;
+                this.applet.resize(var1, var2);
+                this.applet.validate();
+                this.recursiveResizeCheck = false;
+            }
+        } else {
+            this.enclosure.setSize(var1, var2);
+            this.enclosure.validate();
+        }
+
+    }
+
+    public AudioClip getAudioClip(URL var1) {
+        AudioClip var2 = null;
+        if (var2 == null) {
+            var2 = this.getNewAudioClip(var1);
+        }
+
+        return var2;
+    }
+
+    public Image getImage(URL var1) {
+        try {
+            Object var2 = var1.getContent();
+            if (var2 instanceof ImageProducer) {
+                return this.applet.createImage((ImageProducer)var2);
+            }
+        } catch (IOException var3) {
+        }
+
+        return null;
+    }
+
+    public Applet getApplet(String var1) {
+        return null;
+    }
+
+    public Enumeration<Applet> getApplets() {
+        return (new Vector()).elements();
+    }
+
+    public void showDocument(URL var1) {
+        if (this.applet != null) {
+            this.applet.getAppletContext().showDocument(var1);
+        }
+
+    }
+
+    public void showDocument(URL var1, String var2) {
+        if (this.applet != null) {
+            this.applet.getAppletContext().showDocument(var1, var2);
+        }
+
+    }
+
+    public void showStatus(String var1) {
+        if (this.applet == null) {
+            System.out.println(var1);
+        } else {
+            this.applet.showStatus(var1);
+        }
+
+    }
+
+    public void setStream(String var1, InputStream var2) {
+        throw new ErrorException("setStream: unimplemented operation");
+    }
+
+    public InputStream getStream(String var1) {
+        throw new ErrorException("getStream: unimplemented operation");
+    }
+
+    public Iterator<String> getStreamKeys() {
+        throw new ErrorException("getStreamKeys: unimplemented operation");
+    }
+
+    private String getCanonicalPath(String var1) {
+        String var2;
+        int var3;
+        for(var2 = (new File(var1)).getAbsolutePath(); (var3 = var2.indexOf(32)) != -1; var2 = var2.substring(0, var3) + "%20" + var2.substring(var3 + 1)) {
+        }
+
+        return var2;
+    }
+
+    private synchronized AudioClip getNewAudioClip(URL var1) {
+        try {
+            Class var2 = Class.forName("java.applet.Applet");
+            Class[] var3 = new Class[]{Class.forName("java.net.URL")};
+            Object[] var4 = new Object[]{var1};
+            Method var5 = var2.getMethod("newAudioClip", var3);
+            return (AudioClip)var5.invoke((Object)null, var4);
+        } catch (Exception var6) {
+            return null;
+        }
+    }
+}
