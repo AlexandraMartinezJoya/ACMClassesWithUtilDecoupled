@@ -1,0 +1,145 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.Platform;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Rectangle;
+
+public class GOval extends GObject implements GFillable, GResizable, GScalable {
+    private boolean useArcs;
+    private double frameWidth;
+    private double frameHeight;
+    private boolean isFilled;
+    private Color fillColor;
+    private GArc renderer;
+    static final long serialVersionUID = 1L;
+
+    public GOval(double var1, double var3) {
+        this(0.0D, 0.0D, var1, var3);
+    }
+
+    public GOval(double var1, double var3, double var5, double var7) {
+        this.useArcs = this.checkForArcRendering();
+        this.frameWidth = var5;
+        this.frameHeight = var7;
+        this.setLocation(var1, var3);
+        this.renderer = new GArc(this);
+    }
+
+    public boolean contains(double var1, double var3) {
+        double var5 = this.frameWidth / 2.0D;
+        double var7 = this.frameHeight / 2.0D;
+        if (var5 != 0.0D && var7 != 0.0D) {
+            double var9 = var1 - (this.getX() + var5);
+            double var11 = var3 - (this.getY() + var7);
+            return var9 * var9 / (var5 * var5) + var11 * var11 / (var7 * var7) <= 1.0D;
+        } else {
+            return false;
+        }
+    }
+
+    public void paint(Graphics var1) {
+        Component var2 = this.getComponent();
+        if (var2 instanceof GCanvas && !((GCanvas)var2).getNativeArcFlag()) {
+            this.renderer.paint(var1);
+        } else {
+            Rectangle var3 = this.getAWTBounds();
+            if (this.useArcs) {
+                if (this.isFilled()) {
+                    var1.setColor(this.getFillColor());
+                    var1.fillArc(var3.x, var3.y, var3.width, var3.height, 0, 360);
+                    var1.setColor(this.getColor());
+                }
+
+                var1.drawArc(var3.x, var3.y, var3.width, var3.height, 0, 360);
+            } else {
+                if (this.isFilled()) {
+                    var1.setColor(this.getFillColor());
+                    var1.fillOval(var3.x, var3.y, var3.width, var3.height);
+                    var1.setColor(this.getColor());
+                }
+
+                var1.drawOval(var3.x, var3.y, var3.width, var3.height);
+            }
+        }
+
+    }
+
+    public void setFilled(boolean var1) {
+        this.isFilled = var1;
+        this.repaint();
+    }
+
+    public boolean isFilled() {
+        return this.isFilled;
+    }
+
+    public void setFillColor(Color var1) {
+        this.fillColor = var1;
+        this.repaint();
+    }
+
+    public Color getFillColor() {
+        return this.fillColor == null ? this.getColor() : this.fillColor;
+    }
+
+    public void setSize(double var1, double var3) {
+        this.frameWidth = var1;
+        this.frameHeight = var3;
+        this.repaint();
+    }
+
+    public final void setSize(GDimension var1) {
+        this.setSize(var1.getWidth(), var1.getHeight());
+    }
+
+    public GDimension getSize() {
+        return new GDimension(this.frameWidth, this.frameHeight);
+    }
+
+    public void setBounds(double var1, double var3, double var5, double var7) {
+        this.frameWidth = var5;
+        this.frameHeight = var7;
+        this.setLocation(var1, var3);
+    }
+
+    public final void setBounds(GRectangle var1) {
+        this.setBounds(var1.getX(), var1.getY(), var1.getWidth(), var1.getHeight());
+    }
+
+    public GRectangle getBounds() {
+        return new GRectangle(this.getX(), this.getY(), this.frameWidth, this.frameHeight);
+    }
+
+    public double getWidth() {
+        return this.frameWidth;
+    }
+
+    public double getHeight() {
+        return this.frameHeight;
+    }
+
+    public void scale(double var1, double var3) {
+        this.frameWidth *= var1;
+        this.frameHeight *= var3;
+        this.repaint();
+    }
+
+    public final void scale(double var1) {
+        this.scale(var1, var1);
+    }
+
+    protected Rectangle getAWTBounds() {
+        return new Rectangle(GMath.round(this.getX()), GMath.round(this.getY()), GMath.round(this.frameWidth), GMath.round(this.frameHeight));
+    }
+
+    private boolean checkForArcRendering() {
+        return Platform.isMac() && Platform.compareVersion(System.getProperty("os.version"), "10.1") < 0;
+    }
+}
