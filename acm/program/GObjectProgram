@@ -1,0 +1,37 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.graphics.GDimension;
+import acm.graphics.GObject;
+import acm.util.ErrorException;
+import java.lang.reflect.Method;
+
+class GObjectProgram extends GraphicsProgram {
+    GObjectProgram() {
+    }
+
+    protected void runHook() {
+        GObject var1 = (GObject)this.getStartupObject();
+        GDimension var2 = var1.getSize();
+        this.add(var1, ((double)this.getWidth() - var2.getWidth()) / 2.0D, ((double)this.getHeight() - var2.getHeight()) / 2.0D);
+
+        try {
+            Class var3 = var1.getClass();
+            String var4 = var3.getName();
+            var4 = var4.substring(var4.lastIndexOf(".") + 1);
+            this.setTitle(var4);
+            Method var5 = var3.getMethod("run");
+            if (var5 == null) {
+                throw new ErrorException(var4 + " has no run method");
+            } else {
+                var5.invoke(var1);
+            }
+        } catch (Exception var6) {
+            throw new ErrorException(var6);
+        }
+    }
+}
