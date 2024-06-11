@@ -1,0 +1,164 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.gui;
+
+import acm.io.IODialog;
+import acm.util.ErrorException;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
+import java.text.ParseException;
+import java.util.Locale;
+import javax.swing.JTextField;
+
+public class IntField extends JTextField {
+    private static final int MINIMUM_WIDTH = 60;
+    private static final int MINIMUM_HEIGHT = 22;
+    private static final int PIXEL_MARGIN = 2;
+    private boolean exceptionOnError;
+    private int minValue;
+    private int maxValue;
+    private String formatString;
+    private DecimalFormat formatter;
+    private NumberFormat parser;
+    private IODialog dialog;
+    static final long serialVersionUID = 1L;
+
+    public IntField() {
+        this("", -2147483648, 2147483647);
+    }
+
+    public IntField(int var1) {
+        this("" + var1, -2147483648, 2147483647);
+    }
+
+    public IntField(int var1, int var2) {
+        this("", var1, var2);
+    }
+
+    public IntField(int var1, int var2, int var3) {
+        this("" + var1, var2, var3);
+    }
+
+    private IntField(String var1, int var2, int var3) {
+        this.parser = NumberFormat.getNumberInstance(Locale.US);
+        this.setBackground(Color.WHITE);
+        this.setHorizontalAlignment(4);
+        this.minValue = var2;
+        this.maxValue = var3;
+        this.setText(var1);
+        this.exceptionOnError = false;
+    }
+
+    public int getValue() {
+        String var1 = this.getText().trim();
+        if (var1.length() == 0) {
+            return this.minValue <= 0 && this.maxValue >= 0 ? 0 : this.minValue;
+        } else {
+            String var2 = null;
+            boolean var3 = false;
+
+            int var6;
+            label53: {
+                try {
+                    var6 = this.parser.parse(var1).intValue();
+                    if (var6 >= this.minValue && var6 <= this.maxValue) {
+                        break label53;
+                    }
+
+                    var2 = "Value is outside the specified range";
+                } catch (ParseException var5) {
+                    var2 = "Illegal integer format";
+                }
+
+                if (this.exceptionOnError) {
+                    throw new ErrorException(var2);
+                }
+
+                String var4 = "Enter an integer";
+                if (this.minValue != -2147483648) {
+                    if (this.maxValue != 2147483647) {
+                        var4 = var4 + " between " + this.minValue + " and " + this.maxValue;
+                    } else {
+                        var4 = var4 + " greater than " + this.minValue;
+                    }
+                } else if (this.maxValue != 2147483647) {
+                    var4 = var4 + " less than " + this.maxValue;
+                }
+
+                if (this.dialog == null) {
+                    this.dialog = new IODialog(this);
+                }
+
+                var6 = this.dialog.readInt(var4, this.minValue, this.maxValue);
+            }
+
+            this.setValue(var6);
+            return var6;
+        }
+    }
+
+    public void setValue(int var1) {
+        this.setText(this.formatter == null ? this.defaultFormat(var1) : this.formatter.format((long)var1));
+    }
+
+    public String getFormat() {
+        return this.formatString;
+    }
+
+    public void setFormat(String var1) {
+        String var2 = this.getText().trim();
+        int var3 = 0;
+        if (var2.length() != 0) {
+            try {
+                var3 = this.parser.parse(var2).intValue();
+            } catch (ParseException var5) {
+                throw new ErrorException(var5);
+            }
+        }
+
+        this.formatString = var1;
+        if (var1 == null) {
+            this.formatter = null;
+            this.parser = NumberFormat.getNumberInstance(Locale.US);
+        } else {
+            this.formatter = var1.length() == 0 ? new DecimalFormat() : new DecimalFormat(var1);
+            this.parser = this.formatter;
+        }
+
+        if (var2.length() != 0) {
+            this.setValue(var3);
+        }
+
+    }
+
+    public void setExceptionOnError(boolean var1) {
+        this.exceptionOnError = var1;
+    }
+
+    public boolean getExceptionOnError() {
+        return this.exceptionOnError;
+    }
+
+    public Dimension getPreferredSize() {
+        Dimension var1 = super.getPreferredSize();
+        return new Dimension(Math.max(60, var1.width), Math.max(22, var1.height));
+    }
+
+    private String defaultFormat(int var1) {
+        String var2 = "" + var1;
+        int var3 = this.getSize().width - 4;
+        FontMetrics var4 = this.getFontMetrics(this.getFont());
+        if (var4.stringWidth(var2) > var3) {
+            for(var2 = ""; var4.stringWidth(var2 + "#") <= var3; var2 = var2 + "#") {
+            }
+        }
+
+        return var2;
+    }
+}
