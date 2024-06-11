@@ -1,0 +1,762 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.gui;
+
+import acm.util.ErrorException;
+import acm.util.OptionTable;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
+import java.awt.LayoutManager2;
+import java.awt.Rectangle;
+import java.awt.Scrollbar;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Iterator;
+import javax.swing.JScrollBar;
+import javax.swing.JSlider;
+
+public class TableLayout implements LayoutManager2, Serializable {
+    public static final int NONE = 0;
+    public static final int HORIZONTAL = 2;
+    public static final int VERTICAL = 3;
+    public static final int BOTH = 1;
+    public static final int CENTER = 10;
+    public static final int LEFT = 11;
+    public static final int RIGHT = 12;
+    public static final int TOP = 13;
+    public static final int BOTTOM = 14;
+    public static final int FILL = 1;
+    private static final int LAYOUT_CONTAINER_MODE = 0;
+    private static final int MINIMUM_LAYOUT_SIZE_MODE = 1;
+    private static final int PREFERRED_LAYOUT_SIZE_MODE = 2;
+    private static final int MINIMUM_SCROLLBAR_SIZE = 100;
+    private transient Container targetContainer;
+    private HashMap<Component, GridBagConstraints> constraintTable;
+    private HashMap<Component, TableConstraints> layoutTable;
+    private HashMap<String, Object> propertyTable;
+    private boolean useStrictGridBagModel;
+    private int nRows;
+    private int nColumns;
+    private int horizontalAlignment;
+    private int verticalAlignment;
+    private int defaultFill;
+    private int hGap;
+    private int vGap;
+    static final long serialVersionUID = 1L;
+
+    public TableLayout() {
+        this(0, 0);
+    }
+
+    public TableLayout(int var1, int var2) {
+        this(var1, var2, 0, 0);
+    }
+
+    public TableLayout(int var1, int var2, int var3, int var4) {
+        this.nRows = var1;
+        this.nColumns = var2;
+        this.hGap = var3;
+        this.vGap = var4;
+        this.horizontalAlignment = 10;
+        this.verticalAlignment = 10;
+        this.defaultFill = 1;
+        this.constraintTable = new HashMap();
+        this.propertyTable = new HashMap();
+        this.layoutTable = null;
+    }
+
+    public void setColumnCount(int var1) {
+        this.nColumns = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getColumnCount() {
+        return this.nColumns;
+    }
+
+    public void setRowCount(int var1) {
+        this.nRows = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getRowCount() {
+        return this.nRows;
+    }
+
+    public void setHorizontalAlignment(int var1) {
+        this.horizontalAlignment = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getHorizontalAlignment() {
+        return this.horizontalAlignment;
+    }
+
+    public void setVerticalAlignment(int var1) {
+        this.verticalAlignment = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getVerticalAlignment() {
+        return this.verticalAlignment;
+    }
+
+    public void setDefaultFill(int var1) {
+        this.defaultFill = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getDefaultFill() {
+        return this.defaultFill;
+    }
+
+    public void setHgap(int var1) {
+        this.hGap = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getHgap() {
+        return this.hGap;
+    }
+
+    public void setVgap(int var1) {
+        this.vGap = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public int getVgap() {
+        return this.vGap;
+    }
+
+    public void setStrictGridBagModel(boolean var1) {
+        this.useStrictGridBagModel = var1;
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public boolean isStrictGridBagModel() {
+        return this.useStrictGridBagModel;
+    }
+
+    public void setConstraints(Component var1, GridBagConstraints var2) {
+        this.constraintTable.put(var1, (GridBagConstraints)var2.clone());
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public void setConstraints(Component var1, String var2) {
+        this.setConstraints(var1, (GridBagConstraints)(new TableConstraints(var2)));
+    }
+
+    public TableConstraints getConstraints(Component var1) {
+        GridBagConstraints var2 = this.lookupConstraints(var1);
+        return var2 == null ? null : new TableConstraints(var2);
+    }
+
+    public void addLayoutComponent(String var1, Component var2) {
+        this.addLayoutComponent((Component)var2, (Object)var1);
+    }
+
+    public void removeLayoutComponent(Component var1) {
+        this.constraintTable.remove(var1);
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public Dimension preferredLayoutSize(Container var1) {
+        return var1.getComponentCount() == 0 ? new Dimension(0, 0) : this.processLayout(var1, 2);
+    }
+
+    public Dimension minimumLayoutSize(Container var1) {
+        return var1.getComponentCount() == 0 ? new Dimension(0, 0) : this.processLayout(var1, 1);
+    }
+
+    public void layoutContainer(Container var1) {
+        this.targetContainer = var1;
+        this.processLayout(var1, 0);
+    }
+
+    public void addLayoutComponent(Component var1, Object var2) {
+        if (var2 == null) {
+            var2 = new TableConstraints("");
+            ((TableConstraints)var2).fill = this.defaultFill;
+        } else if (var2 instanceof String) {
+            OptionTable var3 = new OptionTable(((String)var2).toLowerCase(), TableConstraints.LEGAL_KEYS);
+            var2 = new TableConstraints(var3.getMap());
+            if (!var3.isSpecified("fill")) {
+                ((TableConstraints)var2).fill = var3.isSpecified("anchor") ? 0 : this.defaultFill;
+            }
+        } else if (!(var2 instanceof GridBagConstraints)) {
+            throw new ErrorException("TableLayout: Illegal constraints");
+        }
+
+        this.constraintTable.put(var1, (GridBagConstraints)var2);
+        if (this.targetContainer != null) {
+            this.targetContainer.invalidate();
+        }
+
+    }
+
+    public Dimension maximumLayoutSize(Container var1) {
+        return new Dimension(2147483647, 2147483647);
+    }
+
+    public float getLayoutAlignmentX(Container var1) {
+        return 0.5F;
+    }
+
+    public float getLayoutAlignmentY(Container var1) {
+        return 0.5F;
+    }
+
+    public synchronized void invalidateLayout(Container var1) {
+        this.layoutTable = null;
+        Iterator var2 = this.propertyTable.keySet().iterator();
+
+        while(var2.hasNext()) {
+            String var3 = (String)var2.next();
+            if (var3.startsWith("width") && !var3.equals("width")) {
+                this.propertyTable.put(var3, new Integer(0));
+            }
+
+            if (var3.startsWith("height") && !var3.equals("height")) {
+                this.propertyTable.put(var3, new Integer(0));
+            }
+
+            if (var3.startsWith("weightx") && !var3.equals("weightx")) {
+                this.propertyTable.put(var3, new Double(0.0D));
+            }
+
+            if (var3.startsWith("weighty") && !var3.equals("weighty")) {
+                this.propertyTable.put(var3, new Double(0.0D));
+            }
+        }
+
+    }
+
+    public String toString() {
+        String var1 = this.getClass().getName();
+        var1 = var1 + "[rows=" + this.nRows + ",columns=" + this.nColumns;
+        if (this.hGap != 0) {
+            var1 = var1 + ",hgap=" + this.hGap;
+        }
+
+        if (this.vGap != 0) {
+            var1 = var1 + ",vgap=" + this.vGap;
+        }
+
+        var1 = var1 + "]";
+        return var1;
+    }
+
+    protected GridBagConstraints lookupConstraints(Component var1) {
+        return (GridBagConstraints)this.constraintTable.get(var1);
+    }
+
+    protected TableConstraints lookupConstraints(Component var1, Container var2) {
+        synchronized(var2.getTreeLock()) {
+            if (this.layoutTable == null) {
+                this.computeLayoutTable(var2);
+            }
+
+            return (TableConstraints)this.layoutTable.get(var1);
+        }
+    }
+
+    private Dimension getMinimumComponentSize(Component var1) {
+        return this.isScrollbar(var1) ? this.getMinimumScrollbarSize(var1) : var1.getMinimumSize();
+    }
+
+    private Dimension getPreferredComponentSize(Component var1) {
+        return this.isScrollbar(var1) ? this.getMinimumScrollbarSize(var1) : var1.getPreferredSize();
+    }
+
+    private boolean isScrollbar(Component var1) {
+        return var1 instanceof Scrollbar || var1 instanceof JScrollBar || var1 instanceof JSlider;
+    }
+
+    private Dimension getMinimumScrollbarSize(Component var1) {
+        Dimension var2 = var1.getMinimumSize();
+
+        try {
+            Class var3 = var1.getClass();
+            Method var4 = var3.getMethod("getOrientation");
+            int var5 = (Integer)var4.invoke(var1);
+            if (var5 == 0) {
+                var2.width = Math.max(var2.width, 100);
+            } else {
+                var2.height = Math.max(var2.height, 100);
+            }
+
+            return var2;
+        } catch (Exception var6) {
+            throw new ErrorException(var6);
+        }
+    }
+
+    private Dimension processLayout(Container var1, int var2) {
+        synchronized(var1.getTreeLock()) {
+            return this.lockedProcessLayout(var1, var2);
+        }
+    }
+
+    private synchronized Dimension lockedProcessLayout(Container var1, int var2) {
+        Dimension var3 = null;
+        if (this.layoutTable == null) {
+            this.computeLayoutTable(var1);
+        }
+
+        int var4 = this.getIntProperty("nRows");
+        int var5 = this.getIntProperty("nColumns");
+        int[] var6 = new int[var4];
+        int[] var7 = new int[var5];
+        int var8 = var1.getComponentCount();
+
+        int var9;
+        for(var9 = 0; var9 < var8; ++var9) {
+            Component var10 = var1.getComponent(var9);
+            TableConstraints var11 = (TableConstraints)this.layoutTable.get(var10);
+            int var12 = var11.gridx;
+            int var13 = var11.gridy;
+            int var14 = this.getIntProperty("width" + var12);
+            int var15 = this.getIntProperty("height" + var13);
+            if (var14 == 0) {
+                if (var2 != 1 && !this.useStrictGridBagModel) {
+                    var14 = this.getPreferredComponentSize(var10).width;
+                } else {
+                    var14 = this.getMinimumComponentSize(var10).width;
+                }
+
+                var14 += 2 * var11.ipadx + var11.insets.left + var11.insets.right;
+            }
+
+            if (var15 == 0) {
+                if (var2 != 1 && !this.useStrictGridBagModel) {
+                    var15 = this.getPreferredComponentSize(var10).height;
+                } else {
+                    var15 = this.getMinimumComponentSize(var10).height;
+                }
+
+                var15 += 2 * var11.ipady + var11.insets.top + var11.insets.bottom;
+            }
+
+            if (var11.gridwidth <= 1) {
+                var7[var12] = Math.max(var7[var12], var14);
+            }
+
+            if (var11.gridheight <= 1) {
+                var6[var13] = Math.max(var6[var13], var15);
+            }
+        }
+
+        var9 = this.hGap;
+        int var38 = this.vGap;
+        double[] var39 = new double[var5];
+        double[] var40 = new double[var4];
+        double var41 = 0.0D;
+        double var42 = 0.0D;
+
+        int var17;
+        for(var17 = 0; var17 < var5; ++var17) {
+            var9 += var7[var17] + this.hGap;
+            var39[var17] = this.getDoubleProperty("weightx" + var17);
+            var41 += var39[var17];
+        }
+
+        for(var17 = 0; var17 < var4; ++var17) {
+            var38 += var6[var17] + this.vGap;
+            var40[var17] = this.getDoubleProperty("weighty" + var17);
+            var42 += var40[var17];
+        }
+
+        if (var2 == 0) {
+            Dimension var43 = var1.getSize();
+            Insets var18 = var1.getInsets();
+            var43.width -= var18.left + var18.right;
+            var43.height -= var18.top + var18.bottom;
+            int var19 = var43.width - var9;
+            int var20 = var43.height - var38;
+            int var21 = var18.left;
+            int var22 = var18.top;
+            int var23;
+            if (var41 == 0.0D) {
+                label136:
+                switch(this.horizontalAlignment) {
+                case 1:
+                    var41 = (double)var5;
+                    var23 = 0;
+
+                    while(true) {
+                        if (var23 >= var5) {
+                            break label136;
+                        }
+
+                        var39[var23] = 1.0D;
+                        ++var23;
+                    }
+                case 10:
+                    var21 += var19 / 2;
+                    var19 = 0;
+                    break;
+                case 11:
+                    var19 = 0;
+                    break;
+                case 12:
+                    var21 += var19;
+                    var19 = 0;
+                }
+            }
+
+            if (var42 == 0.0D) {
+                label125:
+                switch(this.verticalAlignment) {
+                case 1:
+                    var42 = (double)var4;
+                    var23 = 0;
+
+                    while(true) {
+                        if (var23 >= var4) {
+                            break label125;
+                        }
+
+                        var40[var23] = 1.0D;
+                        ++var23;
+                    }
+                case 10:
+                    var22 += var20 / 2;
+                    var20 = 0;
+                    break;
+                case 13:
+                    var20 = 0;
+                    break;
+                case 14:
+                    var22 += var20;
+                    var20 = 0;
+                }
+            }
+
+            int[] var44 = new int[var5];
+            int var24 = this.hGap + var21;
+
+            int var26;
+            for(int var25 = 0; var25 < var5; ++var25) {
+                var44[var25] = var24;
+                if (var19 > 0) {
+                    var26 = (int)Math.round((double)var19 * var39[var25] / var41);
+                    var7[var25] += var26;
+                    var19 -= var26;
+                    var41 -= var39[var25];
+                }
+
+                var24 += var7[var25] + this.hGap;
+            }
+
+            int[] var45 = new int[var4];
+            var26 = this.vGap + var22;
+
+            int var27;
+            for(var27 = 0; var27 < var4; ++var27) {
+                var45[var27] = var26;
+                if (var20 > 0) {
+                    int var28 = (int)Math.round((double)var20 * var40[var27] / var42);
+                    var6[var27] += var28;
+                    var20 -= var28;
+                    var42 -= var40[var27];
+                }
+
+                var26 += var6[var27] + this.vGap;
+            }
+
+            for(var27 = 0; var27 < var8; ++var27) {
+                Component var46 = var1.getComponent(var27);
+                TableConstraints var29 = (TableConstraints)this.layoutTable.get(var46);
+                int var30 = var29.gridx;
+                int var31 = var29.gridy;
+                int var32 = var44[var30] + var29.insets.left;
+                int var33 = var45[var31] + var29.insets.top;
+                int var34 = var7[var30];
+
+                int var35;
+                for(var35 = 1; var35 < var29.gridwidth && var30 + var35 < var5; ++var35) {
+                    var34 += var7[var30 + var35] + this.hGap;
+                }
+
+                var34 -= var29.insets.left + var29.insets.right;
+                var35 = var6[var31];
+
+                for(int var36 = 1; var36 < var29.gridheight && var31 + var36 < var4; ++var36) {
+                    var35 += var6[var31 + var36] + this.vGap;
+                }
+
+                var35 -= var29.insets.top + var29.insets.bottom;
+                Dimension var47 = this.useStrictGridBagModel ? this.getMinimumComponentSize(var46) : this.getPreferredComponentSize(var46);
+                Rectangle var37 = this.computeCellBounds(new Rectangle(var32, var33, var34, var35), var47, var29);
+                var46.setBounds(var37.x, var37.y, var37.width, var37.height);
+            }
+        } else {
+            var3 = new Dimension(var9, var38);
+        }
+
+        return var3;
+    }
+
+    private void computeLayoutTable(Container var1) {
+        int[] var2 = null;
+        int var3 = 0;
+        int var4 = 0;
+        int var5 = this.nColumns;
+        int var6 = var1.getComponentCount();
+        boolean var7 = false;
+        this.layoutTable = new HashMap();
+
+        for(int var8 = 0; var8 < var6; ++var8) {
+            Component var9 = var1.getComponent(var8);
+            TableConstraints var10 = this.getConstraints(var9);
+            if (var10.gridx != -1) {
+                var4 = var10.gridx;
+            }
+
+            if (var10.gridy != -1) {
+                var3 = var10.gridy;
+            }
+
+            if (this.nRows > 0 && var3 >= this.nRows) {
+                throw new ErrorException("TableLayout: Too many rows specified");
+            }
+
+            int var12;
+            boolean var15;
+            int var10002;
+            label116:
+            while(true) {
+                do {
+                    do {
+                        if (var2 == null || var4 >= var2.length || var2[var4] <= 0) {
+                            var10.gridx = var4;
+                            var10.gridy = var3;
+                            var15 = var7;
+                            this.setMaxProperty("width" + var4, var10.width);
+                            this.setMaxProperty("height" + var3, var10.height);
+                            this.setMaxProperty("weightx" + var4, var10.weightx);
+                            this.setMaxProperty("weighty" + var3, var10.weighty);
+                            var12 = 1;
+                            switch(var10.gridwidth) {
+                            case -1:
+                                if (var5 <= 0) {
+                                    throw new ErrorException("TableLayout: Illegal to use gridwidth=RELATIVE in first row");
+                                }
+
+                                var12 = var5 - var4 - 1;
+                                var7 = true;
+                                break label116;
+                            case 0:
+                                var15 = true;
+                                if (var5 > 0) {
+                                    var12 = var5 - var4;
+                                }
+                                break label116;
+                            default:
+                                var12 = var10.gridwidth;
+                                var15 = this.nColumns > 0 && var4 + var10.gridwidth >= this.nColumns;
+                                break label116;
+                            }
+                        }
+
+                        ++var4;
+                    } while(var5 <= 0);
+                } while(var4 < var5);
+
+                for(int var11 = 0; var11 < var2.length; ++var11) {
+                    if (var2[var11] > 0) {
+                        var10002 = var2[var11]--;
+                    }
+                }
+
+                ++var3;
+                var4 = this.getFirstAvailableColumn(var2);
+            }
+
+            int var13;
+            if (var12 > 1 && var2 != null) {
+                for(var13 = var4; var13 < Math.min(var2.length, var4 + var12); ++var13) {
+                    if (var2[var13] != 0) {
+                        throw new ErrorException("TableLayout: Overlapping cells");
+                    }
+                }
+            }
+
+            boolean var16 = true;
+            switch(var10.gridheight) {
+            case -1:
+                throw new ErrorException("TableLayout: Illegal to use gridheight=RELATIVE");
+            case 0:
+                var13 = 2147483647;
+                break;
+            default:
+                var13 = var10.gridheight;
+            }
+
+            int var17;
+            if (var13 > 1) {
+                if (var2 == null) {
+                    var2 = new int[var4 + var12];
+                } else if (var2.length < var4 + var12) {
+                    int[] var14 = var2;
+                    var2 = new int[var4 + var12];
+                    System.arraycopy(var14, 0, var2, 0, var14.length);
+                }
+
+                for(var17 = var4; var17 < var4 + var12; ++var17) {
+                    var2[var17] = var13;
+                }
+            }
+
+            var10.gridwidth = var12;
+            var10.gridheight = var13;
+            this.layoutTable.put(var9, var10);
+
+            for(var4 += var12; var15 || var5 > 0 && var4 >= var5; var15 = false) {
+                if (var5 <= 0) {
+                    var5 = var4;
+                }
+
+                if (var2 != null) {
+                    for(var17 = 0; var17 < var2.length; ++var17) {
+                        if (var2[var17] > 0) {
+                            var10002 = var2[var17]--;
+                        }
+                    }
+                }
+
+                ++var3;
+                var4 = this.getFirstAvailableColumn(var2);
+            }
+        }
+
+        if (var5 <= 0) {
+            var5 = var4;
+        }
+
+        this.setIntProperty("nColumns", var5);
+        this.setIntProperty("nRows", var3 + 1);
+    }
+
+    private Rectangle computeCellBounds(Rectangle var1, Dimension var2, TableConstraints var3) {
+        int var4 = var1.x;
+        int var5 = var1.y;
+        int var6 = var1.width;
+        int var7 = var1.height;
+        if (var3.fill == 0 || var3.fill == 3) {
+            var6 = var2.width;
+        }
+
+        if (var3.fill == 0 || var3.fill == 2) {
+            var7 = var2.height;
+        }
+
+        if (var6 != var1.width) {
+            switch(var3.anchor) {
+            case 10:
+            case 11:
+            case 15:
+                var4 += (var1.width - var6) / 2;
+                break;
+            case 12:
+            case 13:
+            case 14:
+                var4 += var1.width - var6;
+            }
+        }
+
+        if (var7 != var1.height) {
+            switch(var3.anchor) {
+            case 10:
+            case 13:
+            case 17:
+                var5 += (var1.height - var7) / 2;
+            case 11:
+            case 12:
+            default:
+                break;
+            case 14:
+            case 15:
+            case 16:
+                var5 += var1.height - var7;
+            }
+        }
+
+        return new Rectangle(var4, var5, var6, var7);
+    }
+
+    private void setMaxProperty(String var1, int var2) {
+        this.setIntProperty(var1, Math.max(var2, this.getIntProperty(var1)));
+    }
+
+    private void setMaxProperty(String var1, double var2) {
+        this.setDoubleProperty(var1, Math.max(var2, this.getDoubleProperty(var1)));
+    }
+
+    private void setIntProperty(String var1, int var2) {
+        this.propertyTable.put(var1, new Integer(var2));
+    }
+
+    private int getIntProperty(String var1) {
+        Object var2 = this.propertyTable.get(var1);
+        return var2 == null ? 0 : (Integer)var2;
+    }
+
+    private void setDoubleProperty(String var1, double var2) {
+        this.propertyTable.put(var1, new Double(var2));
+    }
+
+    private double getDoubleProperty(String var1) {
+        Object var2 = this.propertyTable.get(var1);
+        return var2 == null ? 0.0D : (Double)var2;
+    }
+
+    private int getFirstAvailableColumn(int[] var1) {
+        if (this.useStrictGridBagModel && var1 != null) {
+            for(int var2 = var1.length; var2 > 0; --var2) {
+                if (var1[var2 - 1] > 0) {
+                    return var2;
+                }
+            }
+        }
+
+        return 0;
+    }
+}
