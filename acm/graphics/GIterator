@@ -1,0 +1,52 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.ErrorException;
+import java.util.Iterator;
+
+class GIterator implements Iterator<GObject> {
+    private GContainer cont;
+    private int dir;
+    private int index;
+    private int nElements;
+
+    public GIterator(GContainer var1, int var2) {
+        switch(var2) {
+        case 0:
+        case 1:
+            this.dir = var2;
+            this.cont = var1;
+            this.index = 0;
+            this.nElements = var1.getElementCount();
+            return;
+        default:
+            throw new ErrorException("Illegal direction for iterator");
+        }
+    }
+
+    public boolean hasNext() {
+        return this.index < this.nElements;
+    }
+
+    public GObject next() {
+        return this.dir == 1 ? this.cont.getElement(this.nElements - this.index++ - 1) : this.cont.getElement(this.index++);
+    }
+
+    public GObject nextElement() {
+        return this.next();
+    }
+
+    public void remove() {
+        if (this.dir == 1) {
+            this.cont.remove(this.cont.getElement(this.nElements - --this.index - 1));
+        } else {
+            this.cont.remove(this.cont.getElement(--this.index));
+        }
+
+        --this.nElements;
+    }
+}
