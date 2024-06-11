@@ -1,0 +1,192 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import java.awt.Polygon;
+import java.io.Serializable;
+import java.util.ArrayList;
+
+class VertexList implements Serializable {
+    private ArrayList<GPoint> vertices;
+    private double cx;
+    private double cy;
+
+    public VertexList() {
+        this.vertices = new ArrayList();
+        this.cx = 0.0D;
+        this.cy = 0.0D;
+    }
+
+    public VertexList(VertexList var1) {
+        this();
+
+        for(int var2 = 0; var2 < var1.vertices.size(); ++var2) {
+            this.vertices.add(var1.vertices.get(var2));
+        }
+
+    }
+
+    public synchronized void addVertex(double var1, double var3) {
+        this.cx = var1;
+        this.cy = var3;
+        this.vertices.add(new GPoint(this.cx, this.cy));
+    }
+
+    public synchronized void addEdge(double var1, double var3) {
+        this.cx += var1;
+        this.cy += var3;
+        this.vertices.add(new GPoint(this.cx, this.cy));
+    }
+
+    public void addArc(double var1, double var3, double var5, double var7) {
+        double var9 = var3 / var1;
+        double var11 = var1 / 2.0D;
+        double var13 = var3 / 2.0D;
+        double var15 = this.cx - var11 * GMath.cosDegrees(var5);
+        double var17 = this.cy + var13 * GMath.sinDegrees(var5);
+        if (var7 > 359.99D) {
+            var7 = 360.0D;
+        }
+
+        if (var7 < -359.99D) {
+            var7 = -360.0D;
+        }
+
+        double var19 = Math.atan2(1.0D, Math.max(var1, var3));
+        int var21 = (int)(GMath.toRadians(Math.abs(var7)) / var19);
+        var19 = GMath.toRadians(var7) / (double)var21;
+        double var22 = GMath.toRadians(var5);
+
+        for(int var24 = 0; var24 < var21; ++var24) {
+            var22 += var19;
+            double var25 = var15 + var11 * Math.cos(var22);
+            double var27 = var17 - var11 * Math.sin(var22) * var9;
+            this.addVertex(var25, var27);
+        }
+
+    }
+
+    public synchronized void add(GPoint[] var1) {
+        for(int var2 = 0; var2 < var1.length; ++var2) {
+            this.vertices.add(new GPoint(var1[var2].getX(), var1[var2].getY()));
+        }
+
+    }
+
+    public synchronized void remove(GPoint var1) {
+        this.vertices.remove(var1);
+    }
+
+    public synchronized void clear() {
+        this.vertices.clear();
+    }
+
+    public int size() {
+        return this.vertices.size();
+    }
+
+    public GPoint getCurrentPoint() {
+        return this.vertices.size() == 0 ? null : new GPoint(this.cx, this.cy);
+    }
+
+    public synchronized GRectangle getBounds(double var1, double var3, double var5, double var7, double var9) {
+        int var11 = this.vertices.size();
+        if (var11 == 0) {
+            return new GRectangle();
+        } else {
+            double var12 = 0.0D;
+            double var14 = 0.0D;
+            double var16 = 0.0D;
+            double var18 = 0.0D;
+            double var20 = GMath.sinDegrees(var9);
+            double var22 = GMath.cosDegrees(var9);
+            boolean var24 = true;
+
+            for(int var25 = 0; var25 < this.vertices.size(); ++var25) {
+                GPoint var26 = (GPoint)this.vertices.get(var25);
+                double var27 = var1 + var5 * (var22 * var26.getX() + var20 * var26.getY());
+                double var29 = var3 + var7 * (var22 * var26.getY() - var20 * var26.getX());
+                if (var24) {
+                    var12 = var27;
+                    var14 = var27;
+                    var16 = var29;
+                    var18 = var29;
+                    var24 = false;
+                } else {
+                    var12 = Math.min(var12, var27);
+                    var14 = Math.max(var14, var27);
+                    var16 = Math.min(var16, var29);
+                    var18 = Math.max(var18, var29);
+                }
+            }
+
+            return new GRectangle(var12, var16, var14 - var12, var18 - var16);
+        }
+    }
+
+    public synchronized boolean contains(double var1, double var3) {
+        int var5 = this.vertices.size();
+        boolean var6 = false;
+
+        for(int var7 = 0; var7 < var5; ++var7) {
+            GPoint var8 = (GPoint)this.vertices.get(var7);
+            GPoint var9 = (GPoint)this.vertices.get((var7 + 1) % var5);
+            if ((var8.getY() < var3 && var9.getY() >= var3 || var9.getY() < var3 && var8.getY() >= var3) && var8.getX() + (var3 - var8.getY()) / (var9.getY() - var8.getY()) * (var9.getX() - var8.getX()) < var1) {
+                var6 = !var6;
+            }
+        }
+
+        return var6;
+    }
+
+    public synchronized Polygon createPolygon(double var1, double var3, double var5, double var7, double var9) {
+        double var11 = GMath.sinDegrees(var9);
+        double var13 = GMath.cosDegrees(var9);
+        Polygon var15 = new Polygon();
+
+        for(int var16 = 0; var16 < this.vertices.size(); ++var16) {
+            GPoint var17 = (GPoint)this.vertices.get(var16);
+            double var18 = var1 + var5 * (var13 * var17.getX() + var11 * var17.getY());
+            double var20 = var3 + var7 * (var13 * var17.getY() - var11 * var17.getX());
+            var15.addPoint(GMath.round(var18), GMath.round(var20));
+        }
+
+        return var15;
+    }
+
+    public void recenter() {
+        double var1 = 0.0D;
+        double var3 = 0.0D;
+        double var5 = 0.0D;
+        double var7 = 0.0D;
+        boolean var9 = true;
+
+        for(int var10 = 0; var10 < this.vertices.size(); ++var10) {
+            GPoint var11 = (GPoint)this.vertices.get(var10);
+            if (var9) {
+                var1 = var11.getX();
+                var3 = var11.getX();
+                var5 = var11.getY();
+                var7 = var11.getY();
+                var9 = false;
+            } else {
+                var1 = Math.min(var1, var11.getX());
+                var3 = Math.max(var3, var11.getX());
+                var5 = Math.min(var5, var11.getY());
+                var7 = Math.max(var7, var11.getY());
+            }
+        }
+
+        double var16 = (var1 + var3) / 2.0D;
+        double var12 = (var5 + var7) / 2.0D;
+
+        for(int var14 = 0; var14 < this.vertices.size(); ++var14) {
+            GPoint var15 = (GPoint)this.vertices.get(var14);
+            var15.translate(-var16, -var12);
+        }
+
+    }
+}
