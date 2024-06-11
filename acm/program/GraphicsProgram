@@ -1,0 +1,174 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.graphics.GCanvas;
+import acm.graphics.GMath;
+import acm.graphics.GObject;
+import acm.graphics.GPoint;
+import acm.util.ErrorException;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.util.EventListener;
+import java.util.Iterator;
+
+public abstract class GraphicsProgram extends Program {
+    private GCanvas gc = this.createGCanvas();
+    private GProgramListener eventListener = new GProgramListener(this);
+
+    protected GraphicsProgram() {
+        this.gc.addMouseListener(this.eventListener);
+        if (this.eventListener.needsMouseMotionListeners()) {
+            this.gc.addMouseMotionListener(this.eventListener);
+        }
+
+        this.add((Component)this.gc, (Object)"Center");
+        this.validate();
+    }
+
+    public void run() {
+    }
+
+    public void init() {
+    }
+
+    public GCanvas getGCanvas() {
+        return this.gc;
+    }
+
+    public void add(GObject var1) {
+        this.gc.add(var1);
+    }
+
+    public final void add(GObject var1, double var2, double var4) {
+        var1.setLocation(var2, var4);
+        this.add(var1);
+    }
+
+    public final void add(GObject var1, GPoint var2) {
+        var1.setLocation(var2);
+        this.add(var1);
+    }
+
+    public final void add(Component var1, double var2, double var4) {
+        var1.setLocation(GMath.round(var2), GMath.round(var4));
+        this.gc.add(var1);
+    }
+
+    public final void add(Component var1, GPoint var2) {
+        this.add(var1, var2.getX(), var2.getY());
+    }
+
+    public void remove(GObject var1) {
+        this.gc.remove(var1);
+    }
+
+    public void removeAll() {
+        this.gc.removeAll();
+    }
+
+    public int getElementCount() {
+        return this.gc.getElementCount();
+    }
+
+    public GObject getElement(int var1) {
+        return this.gc.getElement(var1);
+    }
+
+    public GObject getElementAt(double var1, double var3) {
+        return this.gc.getElementAt(var1, var3);
+    }
+
+    public final GObject getElementAt(GPoint var1) {
+        return this.getElementAt(var1.getX(), var1.getY());
+    }
+
+    public Iterator<GObject> iterator() {
+        return this.gc.iterator();
+    }
+
+    public Iterator<GObject> iterator(int var1) {
+        return this.gc.iterator(var1);
+    }
+
+    public void addMouseListeners() {
+        this.gc.addMouseListener(this);
+        this.gc.addMouseMotionListener(this);
+    }
+
+    public void addMouseListeners(EventListener var1) {
+        boolean var2 = false;
+        if (var1 instanceof MouseListener) {
+            this.gc.addMouseListener((MouseListener)var1);
+            var2 = true;
+        }
+
+        if (var1 instanceof MouseMotionListener) {
+            this.gc.addMouseMotionListener((MouseMotionListener)var1);
+            var2 = true;
+        }
+
+        if (!var2) {
+            throw new ErrorException("addMouseListeners: Illegal listener");
+        }
+    }
+
+    public void addKeyListeners() {
+        this.gc.addKeyListener(this);
+    }
+
+    public void addKeyListeners(KeyListener var1) {
+        this.gc.addKeyListener(var1);
+    }
+
+    public void waitForClick() {
+        this.eventListener.waitForClick();
+    }
+
+    public void repaint() {
+        this.gc.repaint();
+        super.repaint();
+    }
+
+    public void removeAllComponents() {
+        super.removeAll();
+    }
+
+    public void setBackground(Color var1) {
+        super.setBackground(var1);
+        if (this.gc != null) {
+            this.gc.setBackground(var1);
+        }
+
+    }
+
+    public static void startGraphicsProgram(GObject var0, String[] var1) {
+        GObjectProgram var2 = new GObjectProgram();
+        var2.setStartupObject(var0);
+        var2.start(var1);
+    }
+
+    protected GCanvas createGCanvas() {
+        return new GCanvas();
+    }
+
+    protected void endHook() {
+        this.gc.repaint();
+    }
+
+    protected boolean isStarted() {
+        if (this.gc != null && super.isStarted()) {
+            Dimension var1 = this.gc.getSize();
+            return var1 != null && var1.width != 0 && var1.height != 0;
+        } else {
+            return false;
+        }
+    }
+}
