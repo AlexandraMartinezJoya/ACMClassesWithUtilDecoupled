@@ -1,0 +1,69 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.util.ErrorException;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.lang.reflect.Method;
+
+class DefaultActionListener implements ActionListener {
+    public DefaultActionListener() {
+    }
+
+    public void actionPerformed(ActionEvent var1) {
+        Component var2 = (Component)var1.getSource();
+        Program var3 = this.findProgram(var2);
+        if (var3 != null && countActionListeners(var2) > 1) {
+            try {
+                Class[] var10 = new Class[]{Class.forName("java.awt.event.ActionListener")};
+                Object[] var9 = new Object[]{this};
+                Method var6 = var2.getClass().getMethod("removeActionListener", var10);
+                var6.invoke(var2, var9);
+            } catch (Exception var7) {
+                throw new ErrorException(var7);
+            }
+        } else {
+            String var4 = "No ActionListener is attached";
+            if (var2 instanceof Button) {
+                var4 = var4 + " to button " + ((Button)var2).getLabel();
+            } else {
+                try {
+                    Method var5 = var2.getClass().getMethod("getText");
+                    var4 = var4 + " to button " + (String)var5.invoke(var2);
+                } catch (Exception var8) {
+                    throw new ErrorException(var8);
+                }
+            }
+
+            if (var3 == null) {
+                throw new ErrorException(var4);
+            } else {
+                var3.getDialog().showErrorMessage(var4);
+            }
+        }
+    }
+
+    protected static int countActionListeners(Component var0) {
+        try {
+            Method var1 = var0.getClass().getMethod("getActionListeners");
+            ActionListener[] var2 = (ActionListener[])((ActionListener[])var1.invoke(var0));
+            return var2.length;
+        } catch (Exception var3) {
+            return -1;
+        }
+    }
+
+    private Program findProgram(Component var1) {
+        if (var1 instanceof Program) {
+            return (Program)var1;
+        } else {
+            return var1 != null ? this.findProgram(var1.getParent()) : null;
+        }
+    }
+}
