@@ -1,0 +1,565 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.io.IOConsole;
+import acm.io.IODialog;
+import acm.io.IOModel;
+import acm.util.ErrorException;
+import acm.util.JTFTools;
+import java.applet.AppletStub;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.LayoutManager;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+import javax.swing.JPanel;
+
+public class CommandLineProgram implements IOModel, Runnable, MouseListener, MouseMotionListener, KeyListener, ActionListener {
+    public static final String NORTH = "North";
+    public static final String SOUTH = "South";
+    public static final String EAST = "East";
+    public static final String WEST = "West";
+    public static final String CENTER = "Center";
+    private HashMap<String, String> parameterTable = null;
+    private ArrayList<Object> finalizers = new ArrayList();
+    private AppletStub appletStub;
+    private String myTitle = this.getClass().getName();
+    private IOConsole myConsole;
+
+    protected CommandLineProgram() {
+        this.myTitle = this.myTitle.substring(this.myTitle.lastIndexOf(".") + 1);
+        this.setConsole(this.createConsole());
+    }
+
+    public static void checkIfHeadless(String var0) {
+        if (!JTFTools.testDebugOption("headless")) {
+            try {
+                Class var1 = Class.forName("java.awt.GraphicsEnvironment");
+                Method var2 = var1.getMethod("isHeadless");
+                if (!Boolean.TRUE.equals(var2.invoke((Object)null))) {
+                    return;
+                }
+            } catch (Exception var5) {
+                return;
+            }
+        }
+
+        try {
+            CommandLineProgramLoader var6 = new CommandLineProgramLoader(var0);
+            Class var7 = var6.loadClass(var0);
+            CommandLineProgram var3 = (CommandLineProgram)var7.newInstance();
+            var3.init();
+            var3.run();
+            var3.exit();
+        } catch (Exception var4) {
+            throw new ErrorException(var4);
+        }
+    }
+
+    public void run() {
+    }
+
+    public void init() {
+    }
+
+    public void print(String var1) {
+        this.getOutputModel().print(var1);
+    }
+
+    public final void print(boolean var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(char var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(double var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(float var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(int var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(long var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(Object var1) {
+        this.print("" + var1);
+    }
+
+    public void println() {
+        this.getOutputModel().println();
+    }
+
+    public void println(String var1) {
+        this.getOutputModel().println(var1);
+    }
+
+    public final void println(boolean var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(char var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(double var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(float var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(int var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(long var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(Object var1) {
+        this.println("" + var1);
+    }
+
+    public void showErrorMessage(String var1) {
+        this.getOutputModel().showErrorMessage(var1);
+    }
+
+    public final String readLine() {
+        return this.readLine((String)null);
+    }
+
+    public String readLine(String var1) {
+        return this.getInputModel().readLine(var1);
+    }
+
+    public final int readInt() {
+        return this.readInt((String)null, -2147483648, 2147483647);
+    }
+
+    public final int readInt(int var1, int var2) {
+        return this.readInt((String)null, var1, var2);
+    }
+
+    public final int readInt(String var1) {
+        return this.readInt(var1, -2147483648, 2147483647);
+    }
+
+    public int readInt(String var1, int var2, int var3) {
+        return this.getInputModel().readInt(var1, var2, var3);
+    }
+
+    public final double readDouble() {
+        return this.readDouble((String)null, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public final double readDouble(double var1, double var3) {
+        return this.readDouble((String)null, var1, var3);
+    }
+
+    public final double readDouble(String var1) {
+        return this.readDouble(var1, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public double readDouble(String var1, double var2, double var4) {
+        return this.getInputModel().readDouble(var1, var2, var4);
+    }
+
+    public final boolean readBoolean() {
+        return this.readBoolean((String)null);
+    }
+
+    public final boolean readBoolean(String var1) {
+        return this.readBoolean(var1, "true", "false");
+    }
+
+    public boolean readBoolean(String var1, String var2, String var3) {
+        return this.getInputModel().readBoolean(var1, var2, var3);
+    }
+
+    public boolean isAppletMode() {
+        return false;
+    }
+
+    public void setConsole(IOConsole var1) {
+        this.myConsole = var1;
+    }
+
+    public IOConsole getConsole() {
+        return this.myConsole;
+    }
+
+    public IODialog getDialog() {
+        return null;
+    }
+
+    public IOModel getInputModel() {
+        return this.getConsole();
+    }
+
+    public IOModel getOutputModel() {
+        return this.getConsole();
+    }
+
+    public BufferedReader getReader() {
+        return this.getConsole().getReader();
+    }
+
+    public PrintWriter getWriter() {
+        return this.getConsole().getWriter();
+    }
+
+    public JPanel getRegionPanel(String var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void add(Component var1, String var2, Object var3) {
+        if (var1 != var1) {
+        }
+
+        if (var2 != var2) {
+        }
+
+        if (var3 != var3) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void addActionListeners() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void addActionListeners(ActionListener var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void setTitle(String var1) {
+        this.myTitle = var1;
+    }
+
+    public String getTitle() {
+        return this.myTitle;
+    }
+
+    public void start(String[] var1) {
+        if (this.parameterTable == null && var1 != null) {
+            this.parameterTable = createParameterTable(var1);
+        }
+
+        this.init();
+        this.run();
+    }
+
+    public void exit() {
+        int var1 = this.finalizers.size();
+
+        for(int var2 = 0; var2 < var1; ++var2) {
+            Object var3 = this.finalizers.get(var2);
+
+            try {
+                Class var4 = var3.getClass();
+                Method var5 = var4.getMethod("exit");
+                var5.invoke(var3);
+            } catch (Exception var6) {
+                throw new ErrorException(var6);
+            }
+        }
+
+    }
+
+    public void addExitHook(Object var1) {
+        this.finalizers.add(var1);
+    }
+
+    public void mouseClicked(MouseEvent var1) {
+    }
+
+    public void mousePressed(MouseEvent var1) {
+    }
+
+    public void mouseReleased(MouseEvent var1) {
+    }
+
+    public void mouseEntered(MouseEvent var1) {
+    }
+
+    public void mouseExited(MouseEvent var1) {
+    }
+
+    public void mouseMoved(MouseEvent var1) {
+    }
+
+    public void mouseDragged(MouseEvent var1) {
+    }
+
+    public void keyTyped(KeyEvent var1) {
+    }
+
+    public void keyPressed(KeyEvent var1) {
+    }
+
+    public void keyReleased(KeyEvent var1) {
+    }
+
+    public void actionPerformed(ActionEvent var1) {
+    }
+
+    protected IOConsole createConsole() {
+        return IOConsole.SYSTEM_CONSOLE;
+    }
+
+    protected IODialog createDialogIO() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public Dimension getPreferredSize() {
+        return new Dimension(0, 0);
+    }
+
+    public int getWidth() {
+        return 0;
+    }
+
+    public int getHeight() {
+        return 0;
+    }
+
+    public String getParameter(String var1) {
+        String var2 = null;
+        if (this.parameterTable != null) {
+            var2 = (String)this.parameterTable.get(var1.toLowerCase());
+        }
+
+        return var2;
+    }
+
+    public void setLayout(LayoutManager var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public LayoutManager getLayout() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void setBackground(Color var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected void addImpl(Component var1, Object var2, int var3) {
+        if (var1 != var1) {
+        }
+
+        if (var2 != var2) {
+        }
+
+        if (var3 != var3) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void remove(int var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void remove(Component var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void removeAll() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void validate() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void repaint() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    public void destroy() {
+    }
+
+    public static void main(String[] var0) {
+        HashMap var1 = createParameterTable(var0);
+        JTFTools.setDebugOptions((String)var1.get("debug"));
+        String var2 = (String)var1.get("code");
+        if (var2 == null) {
+            var2 = JTFTools.getMainClass();
+        }
+
+        Class var3 = null;
+        CommandLineProgram var4 = null;
+        if (var2 != null) {
+            if (var2.endsWith(".class")) {
+                var2 = var2.substring(0, var2.length() - 6);
+            }
+
+            var2 = var2.replace('/', '.');
+
+            try {
+                var3 = Class.forName(var2);
+            } catch (ClassNotFoundException var8) {
+            }
+        }
+
+        if (var3 != null) {
+            try {
+                Object var5 = var3.newInstance();
+                if (!(var5 instanceof CommandLineProgram)) {
+                    throw new ErrorException("Main class does not specify a program");
+                }
+
+                var4 = (CommandLineProgram)var5;
+            } catch (IllegalAccessException var6) {
+            } catch (InstantiationException var7) {
+            }
+        }
+
+        if (var4 == null) {
+            throw new ErrorException("Cannot determine the main class.");
+        } else {
+            var4.setParameterTable(var1);
+            var4.start((String[])null);
+        }
+    }
+
+    public void menuAction(String var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected void setMacMenuBarFlag(boolean var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected boolean getMacMenuBarFlag() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected Component getBorder(String var1) {
+        if (var1 != var1) {
+        }
+
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected String[] getArgumentArray() {
+        if (this.parameterTable == null) {
+            return null;
+        } else {
+            StringTokenizer var1 = new StringTokenizer((String)this.parameterTable.get("ARGS"), "\t", false);
+            String[] var2 = new String[var1.countTokens()];
+
+            for(int var3 = 0; var1.hasMoreTokens(); ++var3) {
+                var2[var3] = var1.nextToken();
+            }
+
+            return var2;
+        }
+    }
+
+    protected boolean isStarted() {
+        throw new ErrorException("No graphics environment");
+    }
+
+    protected void startHook() {
+    }
+
+    protected void endHook() {
+    }
+
+    protected void setAppletStub(AppletStub var1) {
+        this.appletStub = var1;
+    }
+
+    protected AppletStub getAppletStub() {
+        return this.appletStub;
+    }
+
+    protected void setParameterTable(HashMap<String, String> var1) {
+        this.parameterTable = var1;
+    }
+
+    protected HashMap<String, String> getParameterTable() {
+        return this.parameterTable;
+    }
+
+    protected static HashMap<String, String> createParameterTable(String[] var0) {
+        if (var0 == null) {
+            return null;
+        } else {
+            HashMap var1 = new HashMap();
+            String var2 = "";
+
+            for(int var3 = 0; var3 < var0.length; ++var3) {
+                String var4 = var0[var3];
+                int var5 = var4.indexOf(61);
+                if (var5 > 0) {
+                    String var6 = var4.substring(0, var5).toLowerCase();
+                    String var7 = var4.substring(var5 + 1);
+                    var1.put(var6, var7);
+                } else {
+                    if (var2.length() > 0) {
+                        var2 = var2 + '\t';
+                    }
+
+                    var2 = var2 + var4;
+                }
+            }
+
+            var1.put("ARGS", var2);
+            return var1;
+        }
+    }
+}
