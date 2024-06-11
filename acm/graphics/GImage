@@ -1,0 +1,173 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+import acm.util.MediaTools;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.io.File;
+
+public class GImage extends GObject implements GResizable, GScalable {
+    private Image myImage;
+    private double myWidth;
+    private double myHeight;
+    private boolean sizeDetermined;
+    static final long serialVersionUID = 1L;
+
+    public GImage(Image var1) {
+        this(var1, 0.0D, 0.0D);
+    }
+
+    public GImage(String var1) {
+        this(var1, 0.0D, 0.0D);
+    }
+
+    public GImage(int[][] var1) {
+        this(var1, 0.0D, 0.0D);
+    }
+
+    public GImage(Image var1, double var2, double var4) {
+        this.setImage(var1);
+        this.setLocation(var2, var4);
+    }
+
+    public GImage(String var1, double var2, double var4) {
+        this(MediaTools.loadImage(var1), var2, var4);
+    }
+
+    public GImage(int[][] var1, double var2, double var4) {
+        this(MediaTools.createImage(var1), var2, var4);
+    }
+
+    public void setImage(Image var1) {
+        this.myImage = MediaTools.loadImage(var1);
+        this.sizeDetermined = false;
+        this.determineSize();
+        this.repaint();
+    }
+
+    public void setImage(String var1) {
+        this.setImage(MediaTools.loadImage(var1));
+    }
+
+    public Image getImage() {
+        return this.myImage;
+    }
+
+    public void saveImage(String var1) {
+        MediaTools.saveImage(this.myImage, var1);
+    }
+
+    public void saveImage(File var1) {
+        MediaTools.saveImage(this.myImage, var1);
+    }
+
+    public void paint(Graphics var1) {
+        Component var2 = this.getComponent();
+        if (var2 == null) {
+            var2 = MediaTools.getImageObserver();
+        }
+
+        if (this.myImage != null && var2 != null) {
+            Rectangle var3 = this.getAWTBounds();
+            Color var4 = this.getObjectColor();
+            if (var4 == null) {
+                var1.drawImage(this.myImage, var3.x, var3.y, var3.width, var3.height, var2);
+            } else {
+                var1.drawImage(this.myImage, var3.x, var3.y, var3.width, var3.height, var4, var2);
+            }
+        }
+
+    }
+
+    public void setSize(double var1, double var3) {
+        this.myWidth = var1;
+        this.myHeight = var3;
+        this.repaint();
+    }
+
+    public final void setSize(GDimension var1) {
+        this.setSize(var1.getWidth(), var1.getHeight());
+    }
+
+    public GDimension getSize() {
+        return new GDimension(this.myWidth, this.myHeight);
+    }
+
+    public void setBounds(double var1, double var3, double var5, double var7) {
+        this.myWidth = var5;
+        this.myHeight = var7;
+        this.setLocation(var1, var3);
+    }
+
+    public final void setBounds(GRectangle var1) {
+        this.setBounds(var1.getX(), var1.getY(), var1.getWidth(), var1.getHeight());
+    }
+
+    public GRectangle getBounds() {
+        this.determineSize();
+        return new GRectangle(this.getX(), this.getY(), this.myWidth, this.myHeight);
+    }
+
+    public void scale(double var1, double var3) {
+        this.myWidth *= var1;
+        this.myHeight *= var3;
+        this.repaint();
+    }
+
+    public final void scale(double var1) {
+        this.scale(var1, var1);
+    }
+
+    public int[][] getPixelArray() {
+        return MediaTools.getPixelArray(this.myImage);
+    }
+
+    public static int getAlpha(int var0) {
+        return var0 >> 24 & 255;
+    }
+
+    public static int getRed(int var0) {
+        return var0 >> 16 & 255;
+    }
+
+    public static int getGreen(int var0) {
+        return var0 >> 8 & 255;
+    }
+
+    public static int getBlue(int var0) {
+        return var0 & 255;
+    }
+
+    public static int createRGBPixel(int var0, int var1, int var2) {
+        return createRGBPixel(var0, var1, var2, 255);
+    }
+
+    public static int createRGBPixel(int var0, int var1, int var2, int var3) {
+        return var3 << 24 | var0 << 16 | var1 << 8 | var2;
+    }
+
+    protected Rectangle getAWTBounds() {
+        this.determineSize();
+        return new Rectangle(GMath.round(this.getX()), GMath.round(this.getY()), GMath.round(this.myWidth), GMath.round(this.myHeight));
+    }
+
+    private void determineSize() {
+        if (!this.sizeDetermined) {
+            Component var1 = this.getComponent();
+            if (var1 == null) {
+                var1 = MediaTools.getImageObserver();
+            }
+
+            this.myWidth = (double)this.myImage.getWidth(var1);
+            this.myHeight = (double)this.myImage.getHeight(var1);
+            this.sizeDetermined = true;
+        }
+    }
+}
