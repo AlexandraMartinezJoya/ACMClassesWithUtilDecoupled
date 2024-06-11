@@ -1,0 +1,51 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.graphics;
+
+public class GMath {
+    private GMath() {
+    }
+
+    public static int round(double var0) {
+        return (int)Math.round(var0);
+    }
+
+    public static double sinDegrees(double var0) {
+        return Math.sin(toRadians(var0));
+    }
+
+    public static double cosDegrees(double var0) {
+        return Math.cos(toRadians(var0));
+    }
+
+    public static double tanDegrees(double var0) {
+        return sinDegrees(var0) / cosDegrees(var0);
+    }
+
+    public static double toDegrees(double var0) {
+        return var0 * 180.0D / 3.141592653589793D;
+    }
+
+    public static double toRadians(double var0) {
+        return var0 * 3.141592653589793D / 180.0D;
+    }
+
+    public static double distance(double var0, double var2) {
+        return Math.sqrt(var0 * var0 + var2 * var2);
+    }
+
+    public static double distance(double var0, double var2, double var4, double var6) {
+        return distance(var4 - var0, var6 - var2);
+    }
+
+    public static double angle(double var0, double var2) {
+        return var0 == 0.0D && var2 == 0.0D ? 0.0D : toDegrees(Math.atan2(-var2, var0));
+    }
+
+    public static double angle(double var0, double var2, double var4, double var6) {
+        return angle(var4 - var0, var6 - var2);
+    }
+}
