@@ -1,0 +1,87 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.util.JTFTools;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+
+class AppletStarter implements Runnable {
+    private Program myProgram;
+    private Thread mainThread;
+    private Object executor;
+
+    public AppletStarter(Program var1) {
+        this.myProgram = var1;
+    }
+
+    public void start() {
+        try {
+            this.mainThread = new Thread(this);
+            this.mainThread.start();
+            if (JTFTools.testDebugOption("startup")) {
+                System.out.println("Starting main thread using Thread package");
+            }
+        } catch (SecurityException var2) {
+            if (JTFTools.testDebugOption("startup")) {
+                System.out.println("Starting main thread using Executor because " + var2);
+            }
+
+            this.forkUsingExecutor();
+        }
+
+    }
+
+    public void stop() {
+        try {
+            if (this.executor == null) {
+                Class var1 = Class.forName("java.lang.Thread");
+                Method var2 = var1.getMethod("stop");
+                var2.invoke(this.mainThread);
+            } else {
+                Method var4 = this.executor.getClass().getMethod("shutdownNow");
+                var4.invoke(this.executor);
+            }
+        } catch (Exception var3) {
+        }
+
+    }
+
+    public void run() {
+        this.myProgram.startRun();
+    }
+
+    public Thread getMainThread() {
+        return this.mainThread;
+    }
+
+    private void forkUsingExecutor() {
+        try {
+            Class var1 = Class.forName("java.util.concurrent.ScheduledExecutor");
+            Class[] var2 = new Class[]{Integer.TYPE};
+            Object[] var3 = new Object[]{new Integer(1)};
+            Constructor var4 = var1.getConstructor(var2);
+            this.executor = var4.newInstance(var3);
+            Class var5 = Class.forName("java.util.concurrent.TimeUnit");
+            Field var6 = var5.getField("SECONDS");
+            Object var7 = var6.get((Object)null);
+            Class[] var8 = new Class[]{Class.forName("java.lang.Runnable"), Long.TYPE, Class.forName("java.util.concurrent.TimeUnit")};
+            Object[] var9 = new Object[]{this, new Long(0L), var7};
+            Method var10 = this.executor.getClass().getMethod("schedule", var8);
+            var10.invoke(this.executor, var9);
+        } catch (Exception var11) {
+            if (JTFTools.testDebugOption("startup")) {
+                System.out.println("Executor failed because " + var11);
+            }
+
+            this.executor = null;
+            this.mainThread = Thread.currentThread();
+            this.myProgram.startRun();
+        }
+
+    }
+}
