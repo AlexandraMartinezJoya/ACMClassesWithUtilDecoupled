@@ -1,0 +1,974 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.program;
+
+import acm.gui.TableLayout;
+import acm.io.IOConsole;
+import acm.io.IODialog;
+import acm.io.IOModel;
+import acm.util.Animator;
+import acm.util.ErrorException;
+import acm.util.JTFTools;
+import java.applet.AppletStub;
+import java.awt.BorderLayout;
+import java.awt.Button;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+import java.awt.PrintJob;
+import java.awt.Rectangle;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.BufferedReader;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Properties;
+import java.util.StringTokenizer;
+import javax.swing.JApplet;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JRootPane;
+
+public abstract class Program extends JApplet implements IOModel, Runnable, MouseListener, MouseMotionListener, KeyListener, ActionListener {
+    public static final String NORTH = "North";
+    public static final String SOUTH = "South";
+    public static final String EAST = "East";
+    public static final String WEST = "West";
+    public static final String CENTER = "Center";
+    private static final int DEFAULT_X = 16;
+    private static final int DEFAULT_Y = 40;
+    private static final int DEFAULT_WIDTH = 754;
+    private static final int DEFAULT_HEIGHT = 492;
+    private static final int PRINT_MARGIN = 36;
+    private ArrayList<Object> finalizers;
+    private HashMap<String, String> parameterTable;
+    private JFrame programFrame;
+    private AppletStub appletStub;
+    private String myTitle;
+    private ProgramMenuBar myMenuBar;
+    private Component northBorder;
+    private Component southBorder;
+    private Component eastBorder;
+    private Component westBorder;
+    private JPanel northPanel;
+    private JPanel southPanel;
+    private JPanel eastPanel;
+    private JPanel westPanel;
+    private JPanel centerPanel;
+    private IOConsole myConsole;
+    private IODialog myDialog;
+    private IOModel inputModel;
+    private IOModel outputModel;
+    private Object startupObject;
+    private AppletStarter appletStarter;
+    private Rectangle programBounds;
+    private boolean started;
+    private boolean shown;
+    private boolean initFinished;
+    private boolean appletMode;
+
+    protected Program() {
+        JTFTools.registerApplet(this);
+        this.appletMode = this.checkForAppletMode();
+        this.shown = false;
+        this.parameterTable = null;
+        this.finalizers = new ArrayList();
+        this.myTitle = this.getClass().getName();
+        this.myTitle = this.myTitle.substring(this.myTitle.lastIndexOf(".") + 1);
+        this.appletStub = new ProgramAppletStub(this);
+        this.setAppletStub(this.appletStub);
+        this.initContentPane(this.getContentPane());
+        this.setVisible(false);
+        this.setConsole(this.createConsole());
+        this.myDialog = this.createDialogIO();
+        this.myDialog.setAssociatedConsole(this.myConsole);
+        this.myMenuBar = this.createMenuBar();
+        this.myConsole.setMenuBar(this.myMenuBar);
+    }
+
+    public void run() {
+    }
+
+    public void init() {
+    }
+
+    public void print(String var1) {
+        this.getOutputModel().print(var1);
+    }
+
+    public final void print(boolean var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(char var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(double var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(float var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(int var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(long var1) {
+        this.print("" + var1);
+    }
+
+    public final void print(Object var1) {
+        this.print("" + var1);
+    }
+
+    public void println() {
+        this.getOutputModel().println();
+    }
+
+    public void println(String var1) {
+        this.getOutputModel().println(var1);
+    }
+
+    public final void println(boolean var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(char var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(double var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(float var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(int var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(long var1) {
+        this.println("" + var1);
+    }
+
+    public final void println(Object var1) {
+        this.println("" + var1);
+    }
+
+    public void showErrorMessage(String var1) {
+        this.getOutputModel().showErrorMessage(var1);
+    }
+
+    public final String readLine() {
+        return this.readLine((String)null);
+    }
+
+    public String readLine(String var1) {
+        return this.getInputModel().readLine(var1);
+    }
+
+    public final int readInt() {
+        return this.readInt((String)null, -2147483648, 2147483647);
+    }
+
+    public final int readInt(int var1, int var2) {
+        return this.readInt((String)null, var1, var2);
+    }
+
+    public final int readInt(String var1) {
+        return this.readInt(var1, -2147483648, 2147483647);
+    }
+
+    public int readInt(String var1, int var2, int var3) {
+        return this.getInputModel().readInt(var1, var2, var3);
+    }
+
+    public final double readDouble() {
+        return this.readDouble((String)null, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public final double readDouble(double var1, double var3) {
+        return this.readDouble((String)null, var1, var3);
+    }
+
+    public final double readDouble(String var1) {
+        return this.readDouble(var1, -1.0D / 0.0, 1.0D / 0.0);
+    }
+
+    public double readDouble(String var1, double var2, double var4) {
+        return this.getInputModel().readDouble(var1, var2, var4);
+    }
+
+    public final boolean readBoolean() {
+        return this.readBoolean((String)null);
+    }
+
+    public final boolean readBoolean(String var1) {
+        return this.readBoolean(var1, "true", "false");
+    }
+
+    public boolean readBoolean(String var1, String var2, String var3) {
+        return this.getInputModel().readBoolean(var1, var2, var3);
+    }
+
+    public boolean isAppletMode() {
+        return this.appletMode;
+    }
+
+    public void setConsole(IOConsole var1) {
+        this.myConsole = var1;
+    }
+
+    public IOConsole getConsole() {
+        return this.myConsole;
+    }
+
+    public void setDialog(IODialog var1) {
+        this.myDialog = var1;
+    }
+
+    public IODialog getDialog() {
+        return this.myDialog;
+    }
+
+    public void setInputModel(IOModel var1) {
+        this.inputModel = var1;
+    }
+
+    public void setOutputModel(IOModel var1) {
+        this.outputModel = var1;
+    }
+
+    public IOModel getInputModel() {
+        return (IOModel)(this.inputModel == null ? this.myConsole : this.inputModel);
+    }
+
+    public IOModel getOutputModel() {
+        return (IOModel)(this.outputModel == null ? this.myConsole : this.outputModel);
+    }
+
+    public BufferedReader getReader() {
+        return this.getConsole().getReader();
+    }
+
+    public PrintWriter getWriter() {
+        return this.getConsole().getWriter();
+    }
+
+    public JPanel getRegionPanel(String var1) {
+        if (var1.equals("North")) {
+            return this.northPanel;
+        } else if (var1.equals("South")) {
+            return this.southPanel;
+        } else if (var1.equals("West")) {
+            return this.westPanel;
+        } else if (var1.equals("East")) {
+            return this.eastPanel;
+        } else if (var1.equals("Center")) {
+            return this.centerPanel;
+        } else {
+            throw new ErrorException("getRegionPanel: Illegal region " + var1);
+        }
+    }
+
+    public void add(Component var1, String var2, Object var3) {
+        if (var2.equals("North")) {
+            this.northPanel.add(var1, var3);
+        } else if (var2.equals("South")) {
+            this.southPanel.add(var1, var3);
+        } else if (var2.equals("West")) {
+            this.westPanel.add(var1, var3);
+        } else if (var2.equals("East")) {
+            this.eastPanel.add(var1, var3);
+        } else {
+            if (!var2.equals("Center")) {
+                throw new ErrorException("add: Illegal region " + var2);
+            }
+
+            this.centerPanel.add(var1, var3);
+        }
+
+    }
+
+    public void addActionListeners() {
+        this.addActionListeners(this);
+    }
+
+    public void addActionListeners(ActionListener var1) {
+        this.addActionListeners(this.getContentPane(), var1);
+    }
+
+    public void setTitle(String var1) {
+        this.myTitle = var1;
+        if (this.programFrame != null) {
+            this.programFrame.setTitle(var1);
+        }
+
+    }
+
+    public String getTitle() {
+        return this.myTitle;
+    }
+
+    public ProgramMenuBar getMenuBar() {
+        return this.myMenuBar;
+    }
+
+    public void start(String[] var1) {
+        if (this.parameterTable == null) {
+            this.parameterTable = createParameterTable(var1);
+        }
+
+        if (this.getParent() == null) {
+            this.initApplicationFrame();
+        }
+
+        this.validate();
+        this.setVisible(true);
+        if (this.programFrame != null) {
+            this.programFrame.validate();
+            int var2 = this.centerPanel.getComponentCount();
+            var2 += this.northPanel.getComponentCount();
+            var2 += this.southPanel.getComponentCount();
+            var2 += this.westPanel.getComponentCount();
+            var2 += this.eastPanel.getComponentCount();
+            if (var2 > 0) {
+                this.programFrame.setVisible(true);
+                this.shown = true;
+            }
+
+            this.circumventFrameSizeBug(this.programFrame, this.programBounds.getSize());
+        }
+
+        this.started = true;
+        this.init();
+        if (this.programFrame != null && this.myMenuBar != null) {
+            this.myMenuBar.install(this.programFrame);
+        }
+
+        this.validate();
+        this.startRun();
+    }
+
+    public void exit() {
+        int var1 = this.finalizers.size();
+
+        for(int var2 = 0; var2 < var1; ++var2) {
+            Object var3 = this.finalizers.get(var2);
+
+            try {
+                Class var4 = var3.getClass();
+                Method var5 = var4.getMethod("exit");
+                var5.invoke(var3);
+            } catch (Exception var6) {
+                throw new ErrorException(var6);
+            }
+        }
+
+        JTFTools.terminateAppletThreads(this);
+        if (!this.appletMode) {
+            System.exit(0);
+        }
+
+    }
+
+    public void addExitHook(Object var1) {
+        this.finalizers.add(var1);
+    }
+
+    public void setParameter(String var1, String var2) {
+        if (this.parameterTable == null) {
+            this.parameterTable = new HashMap();
+        }
+
+        this.parameterTable.put(var1.toLowerCase(), var2);
+    }
+
+    public Thread getMainThread() {
+        return this.appletStarter == null ? null : this.appletStarter.getMainThread();
+    }
+
+    public void pause(double var1) {
+        JTFTools.pause(var1);
+    }
+
+    public Dimension getCentralRegionSize() {
+        if (this.centerPanel == null) {
+            return super.getSize();
+        } else if (this.initFinished) {
+            return this.centerPanel.getSize();
+        } else {
+            Dimension var1 = this.programFrame == null ? super.getSize() : this.programFrame.getSize();
+            Insets var2 = this.programFrame == null ? super.getInsets() : this.programFrame.getInsets();
+            var1.width -= this.westPanel.getPreferredSize().width + this.eastPanel.getPreferredSize().width;
+            var1.width -= var2.left + var2.right;
+            var1.height -= this.northPanel.getPreferredSize().height + this.southPanel.getPreferredSize().height;
+            var1.height -= var2.top + var2.bottom;
+            return var1;
+        }
+    }
+
+    public void mouseClicked(MouseEvent var1) {
+    }
+
+    public void mousePressed(MouseEvent var1) {
+    }
+
+    public void mouseReleased(MouseEvent var1) {
+    }
+
+    public void mouseEntered(MouseEvent var1) {
+    }
+
+    public void mouseExited(MouseEvent var1) {
+    }
+
+    public void mouseMoved(MouseEvent var1) {
+    }
+
+    public void mouseDragged(MouseEvent var1) {
+    }
+
+    public void keyTyped(KeyEvent var1) {
+    }
+
+    public void keyPressed(KeyEvent var1) {
+    }
+
+    public void keyReleased(KeyEvent var1) {
+    }
+
+    public void actionPerformed(ActionEvent var1) {
+    }
+
+    protected JFrame createProgramFrame() {
+        return new ProgramFrame(this.getTitle());
+    }
+
+    protected IOConsole createConsole() {
+        return IOConsole.SYSTEM_CONSOLE;
+    }
+
+    protected IODialog createDialogIO() {
+        return new IODialog(this.getContentPane());
+    }
+
+    protected ProgramMenuBar createMenuBar() {
+        return new ProgramMenuBar(this);
+    }
+
+    public Dimension getPreferredSize() {
+        return this.computeProgramBounds().getSize();
+    }
+
+    public int getWidth() {
+        String var1 = this.getMyCaller();
+        return !var1.startsWith("java.") && !var1.startsWith("javax.") ? this.getCentralRegionSize().width : super.getWidth();
+    }
+
+    public int getHeight() {
+        String var1 = this.getMyCaller();
+        return !var1.startsWith("java.") && !var1.startsWith("javax.") ? this.getCentralRegionSize().height : super.getHeight();
+    }
+
+    public String getParameter(String var1) {
+        String var2 = null;
+        if (this.parameterTable != null) {
+            var2 = (String)this.parameterTable.get(var1.toLowerCase());
+        }
+
+        return var2 != null ? var2 : super.getParameter(var1);
+    }
+
+    public void setLayout(LayoutManager var1) {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.centerPanel.setLayout(var1);
+        } else {
+            super.setLayout(var1);
+        }
+
+    }
+
+    public LayoutManager getLayout() {
+        return this.isRootPaneCheckingEnabled() ? this.centerPanel.getLayout() : super.getLayout();
+    }
+
+    public void setBackground(Color var1) {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.centerPanel.setBackground(var1);
+        }
+
+        super.setBackground(var1);
+    }
+
+    protected void addImpl(Component var1, Object var2, int var3) {
+        if (this.isRootPaneCheckingEnabled()) {
+            if (var2 == null) {
+                this.centerPanel.add(var1, var3);
+            } else if (var2.equals("North")) {
+                this.northPanel.add(var1, var3);
+            } else if (var2.equals("South")) {
+                this.southPanel.add(var1, var3);
+            } else if (var2.equals("West")) {
+                this.westPanel.add(var1, var3);
+            } else if (var2.equals("East")) {
+                this.eastPanel.add(var1, var3);
+            } else if (var2.equals("Center")) {
+                this.centerPanel.add(var1, var3);
+            } else {
+                this.centerPanel.add(var1, var2, var3);
+            }
+
+            if (!this.shown && this.programFrame != null) {
+                this.programFrame.setVisible(true);
+                this.shown = true;
+            }
+        } else {
+            super.addImpl(var1, var2, var3);
+        }
+
+    }
+
+    public void remove(int var1) {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.centerPanel.remove(var1);
+        } else {
+            super.remove(var1);
+        }
+
+    }
+
+    public void remove(Component var1) {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.centerPanel.remove(var1);
+        } else {
+            super.remove(var1);
+        }
+
+    }
+
+    public void removeAll() {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.centerPanel.removeAll();
+        } else {
+            super.removeAll();
+        }
+
+    }
+
+    public void validate() {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.getContentPane().validate();
+        }
+
+        super.validate();
+    }
+
+    public void repaint() {
+        if (this.isRootPaneCheckingEnabled()) {
+            this.getContentPane().repaint();
+        }
+
+        super.repaint();
+    }
+
+    public final void start() {
+        this.appletMode = this.getParent() != null;
+        if (this.appletMode) {
+            if (!this.started) {
+                this.started = true;
+                this.validate();
+                this.setVisible(true);
+                this.appletStarter = new AppletStarter(this);
+                this.appletStarter.start();
+            }
+        } else {
+            this.start((String[])null);
+        }
+
+    }
+
+    public void destroy() {
+        Animator.shutdown(this);
+        if (this.appletStarter != null) {
+            this.appletStarter.stop();
+        }
+
+    }
+
+    public static void main(String[] var0) {
+        HashMap var1 = createParameterTable(var0);
+        JTFTools.setDebugOptions((String)var1.get("debug"));
+        String var2 = (String)var1.get("code");
+        if (var2 == null) {
+            var2 = JTFTools.getMainClass();
+        }
+
+        Class var3 = null;
+        Program var4 = null;
+        if (var2 != null) {
+            if (var2.endsWith(".class")) {
+                var2 = var2.substring(0, var2.length() - 6);
+            }
+
+            var2 = var2.replace('/', '.');
+            CommandLineProgram.checkIfHeadless(var2);
+
+            try {
+                var3 = Class.forName(var2);
+            } catch (ClassNotFoundException var9) {
+            }
+        }
+
+        if (var3 != null) {
+            try {
+                Object var5 = var3.newInstance();
+                if (var5 instanceof Program) {
+                    var4 = (Program)var5;
+                    var4.setStartupObject((Object)null);
+                } else {
+                    var2 = (String)var1.get("program");
+                    if (var2 == null) {
+                        throw new ErrorException("Main class does not specify a program");
+                    }
+
+                    var4 = (Program)Class.forName(var2).newInstance();
+                    var4.setStartupObject(var5);
+                }
+            } catch (IllegalAccessException var6) {
+            } catch (InstantiationException var7) {
+            } catch (ClassNotFoundException var8) {
+            }
+        }
+
+        if (var4 == null) {
+            throw new ErrorException("Cannot determine the main class.");
+        } else {
+            var4.setParameterTable(var1);
+            var4.start();
+        }
+    }
+
+    public boolean menuAction(ActionEvent var1) {
+        String var2 = var1.getActionCommand();
+        if (var2.equals("Quit")) {
+            this.exit();
+        } else {
+            if (var2.equals("Print")) {
+                Frame var3 = JTFTools.getEnclosingFrame(this);
+                if (var3 == null) {
+                    return true;
+                }
+
+                PrintJob var4 = var3.getToolkit().getPrintJob(var3, this.myTitle, (Properties)null);
+                if (var4 == null) {
+                    return true;
+                }
+
+                Graphics var5 = var4.getGraphics();
+                var5.translate(36, 36);
+                var3.printAll(var5);
+                var4.end();
+                return true;
+            }
+
+            if (var2.equals("Export Applet") || var2.equals("Submit Project")) {
+                JTFTools.executeExportAction(this, var2);
+                return true;
+            }
+        }
+
+        return this.getConsole().menuAction(var1);
+    }
+
+    protected Component getBorder(String var1) {
+        if (var1.equals("North")) {
+            return this.northBorder;
+        } else if (var1.equals("South")) {
+            return this.southBorder;
+        } else if (var1.equals("East")) {
+            return this.eastBorder;
+        } else if (var1.equals("West")) {
+            return this.westBorder;
+        } else {
+            throw new ErrorException("Illegal border specification - " + var1);
+        }
+    }
+
+    protected String[] getArgumentArray() {
+        if (this.parameterTable == null) {
+            return null;
+        } else {
+            StringTokenizer var1 = new StringTokenizer((String)this.parameterTable.get("ARGS"), "\t", false);
+            String[] var2 = new String[var1.countTokens()];
+
+            for(int var3 = 0; var1.hasMoreTokens(); ++var3) {
+                var2[var3] = var1.nextToken();
+            }
+
+            return var2;
+        }
+    }
+
+    protected boolean isStarted() {
+        IOConsole var1 = this.getConsole();
+        if (var1 == null) {
+            return false;
+        } else if (var1.getParent() == null) {
+            return true;
+        } else {
+            Dimension var2 = var1.getSize();
+            return var1.isShowing() && var2.width != 0 && var2.height != 0;
+        }
+    }
+
+    protected void startHook() {
+    }
+
+    protected void endHook() {
+    }
+
+    protected void setAppletStub(AppletStub var1) {
+        this.appletStub = var1;
+        this.setStub(var1);
+    }
+
+    protected AppletStub getAppletStub() {
+        return this.appletStub;
+    }
+
+    protected void setParameterTable(HashMap<String, String> var1) {
+        this.parameterTable = var1;
+    }
+
+    protected HashMap<String, String> getParameterTable() {
+        return this.parameterTable;
+    }
+
+    protected void setStartupObject(Object var1) {
+        this.startupObject = var1;
+    }
+
+    protected Object getStartupObject() {
+        return this.startupObject;
+    }
+
+    protected void startRun() {
+        ProgramStartupListener var1 = new ProgramStartupListener();
+        JRootPane var2 = this.getRootPane();
+        if (var2.isShowing()) {
+            var2.addComponentListener(var1);
+            var2.validate();
+            var1.waitForStartup(this);
+            var2.update(var2.getGraphics());
+        }
+
+        var2.setCursor(Cursor.getDefaultCursor());
+        this.initFinished = true;
+        this.startHook();
+        this.runHook();
+        this.endHook();
+        if (!var2.isShowing() && !this.getContentPane().isShowing()) {
+            this.exit();
+        }
+
+    }
+
+    protected void runHook() {
+        this.run();
+    }
+
+    protected static HashMap<String, String> createParameterTable(String[] var0) {
+        if (var0 == null) {
+            return null;
+        } else {
+            HashMap var1 = new HashMap();
+            String var2 = "";
+
+            for(int var3 = 0; var3 < var0.length; ++var3) {
+                String var4 = var0[var3];
+                int var5 = var4.indexOf(61);
+                if (var5 > 0) {
+                    String var6 = var4.substring(0, var5).toLowerCase();
+                    String var7 = var4.substring(var5 + 1);
+                    var1.put(var6, var7);
+                } else {
+                    if (var2.length() > 0) {
+                        var2 = var2 + '\t';
+                    }
+
+                    var2 = var2 + var4;
+                }
+            }
+
+            var1.put("ARGS", var2);
+            return var1;
+        }
+    }
+
+    private void initContentPane(Container var1) {
+        var1.setLayout(new ProgramContentPaneLayout(this));
+        this.northPanel = new JPanel();
+        this.southPanel = new JPanel();
+        this.eastPanel = new JPanel();
+        this.westPanel = new JPanel();
+        this.centerPanel = new JPanel();
+        this.northPanel.setLayout(new TableLayout(1, 0, 5, 5));
+        this.southPanel.setLayout(new TableLayout(1, 0, 5, 5));
+        this.westPanel.setLayout(new TableLayout(0, 1, 5, 5));
+        this.eastPanel.setLayout(new TableLayout(0, 1, 5, 5));
+        this.centerPanel.setLayout(new GridLayout(1, 0));
+        var1.add(this.northPanel, "North");
+        var1.add(this.southPanel, "South");
+        var1.add(this.eastPanel, "East");
+        var1.add(this.westPanel, "West");
+        var1.add(this.centerPanel, "Center");
+    }
+
+    private void addActionListeners(Component var1, ActionListener var2) {
+        if (this.isButton(var1)) {
+            if (!this.hasActionListener(var1)) {
+                try {
+                    Class[] var3 = new Class[]{Class.forName("java.awt.event.ActionListener")};
+                    Object[] var4 = new Object[]{var2};
+                    Method var5 = var1.getClass().getMethod("addActionListener", var3);
+                    var5.invoke(var1, var4);
+                } catch (Exception var6) {
+                    throw new ErrorException(var6);
+                }
+            }
+        } else if (var1 instanceof Container) {
+            Container var7 = (Container)var1;
+            int var8 = var7.getComponentCount();
+
+            for(int var9 = 0; var9 < var8; ++var9) {
+                this.addActionListeners(var7.getComponent(var9), var2);
+            }
+        }
+
+    }
+
+    private boolean isButton(Component var1) {
+        return var1 instanceof Button || var1 instanceof JButton;
+    }
+
+    private boolean hasActionListener(Component var1) {
+        try {
+            Method var2 = var1.getClass().getMethod("getActionListeners");
+            ActionListener[] var3 = (ActionListener[])((ActionListener[])var2.invoke(var1));
+            return var3.length > 0;
+        } catch (Exception var4) {
+            return false;
+        }
+    }
+
+    private void initApplicationFrame() {
+        this.programFrame = this.createProgramFrame();
+        ((ProgramAppletStub)this.appletStub).setFrame(this.programFrame);
+        Container var1 = this.programFrame.getContentPane();
+        var1.setLayout(new BorderLayout());
+        var1.add(this.getContentPane(), "Center");
+        this.programFrame.addWindowListener(new ProgramWindowListener(this));
+        this.programBounds = this.computeProgramBounds();
+        Insets var2 = this.programFrame.getInsets();
+        int var3 = this.programBounds.width + var2.left + var2.right;
+        int var4 = this.programBounds.height + var2.top + var2.bottom;
+        this.programFrame.setBounds(this.programBounds.x, this.programBounds.y, var3, var4);
+    }
+
+    private int decodeSizeParameter(String var1, int var2, int var3) {
+        String var4 = this.getParameter(var1);
+        if (var4 == null) {
+            try {
+                Class var5 = this.getClass();
+                Field var6 = var5.getField("APPLICATION_" + var1);
+                Object var7 = var6.get((Object)null);
+                if (var7 instanceof Integer) {
+                    return (Integer)var7;
+                }
+
+                if (!(var7 instanceof String)) {
+                    return var2;
+                }
+
+                var4 = (String)var7;
+            } catch (Exception var8) {
+                return var2;
+            }
+        }
+
+        if (var4.equals("*")) {
+            var4 = "100%";
+        }
+
+        if (var4.endsWith("%")) {
+            int var9 = Integer.parseInt(var4.substring(0, var4.length() - 1));
+            return (int)Math.round((double)var9 / 100.0D * (double)var3);
+        } else {
+            return Integer.parseInt(var4);
+        }
+    }
+
+    private Rectangle computeProgramBounds() {
+        Dimension var1 = Toolkit.getDefaultToolkit().getScreenSize();
+        int var2 = this.decodeSizeParameter("WIDTH", 754, var1.width);
+        int var3 = this.decodeSizeParameter("HEIGHT", 492, var1.height);
+        int var4 = this.decodeSizeParameter("X", var2 >= var1.width ? 0 : 16, var1.width);
+        int var5 = this.decodeSizeParameter("Y", var3 >= var1.height ? 0 : 40, var1.height);
+        return new Rectangle(var4, var5, var2, var3);
+    }
+
+    private boolean checkForAppletMode() {
+        StackTraceElement[] var1 = (new Throwable()).getStackTrace();
+
+        for(int var2 = 1; var2 < var1.length; ++var2) {
+            if (var1[var2].getMethodName().indexOf("Applet") >= 0) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private String getMyCaller() {
+        StackTraceElement[] var1 = (new Throwable()).getStackTrace();
+        return var1[2].getClassName() + "." + var1[2].getMethodName();
+    }
+
+    private void circumventFrameSizeBug(Frame var1, Dimension var2) {
+        Container var3 = this.getContentPane();
+        Dimension var4 = var3.getSize();
+        if (!var2.equals(var4) && var4.width != 0 && var4.height != 0) {
+            Dimension var5 = var1.getSize();
+            var5.width += var2.width - var4.width;
+            var5.height += var2.height - var4.height;
+            var1.setSize(var5.width, var5.height);
+            var1.validate();
+        }
+    }
+}
