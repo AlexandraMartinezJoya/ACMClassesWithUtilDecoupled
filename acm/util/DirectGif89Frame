@@ -1,0 +1,48 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Image;
+import java.awt.image.PixelGrabber;
+import java.io.IOException;
+
+class DirectGif89Frame extends Gif89Frame {
+    private int[] argbPixels;
+
+    public DirectGif89Frame(Image var1) throws IOException {
+        PixelGrabber var2 = new PixelGrabber(var1, 0, 0, -1, -1, true);
+        String var3 = null;
+
+        try {
+            if (!var2.grabPixels()) {
+                var3 = "can't grab pixels from image";
+            }
+        } catch (InterruptedException var5) {
+            var3 = "interrupted grabbing pixels from image";
+        }
+
+        if (var3 != null) {
+            throw new IOException(var3 + " (" + this.getClass().getName() + ")");
+        } else {
+            this.theWidth = var2.getWidth();
+            this.theHeight = var2.getHeight();
+            this.argbPixels = (int[])((int[])var2.getPixels());
+            this.ciPixels = new byte[this.argbPixels.length];
+        }
+    }
+
+    public DirectGif89Frame(int var1, int var2, int[] var3) {
+        this.theWidth = var1;
+        this.theHeight = var2;
+        this.argbPixels = new int[this.theWidth * this.theHeight];
+        System.arraycopy(var3, 0, this.argbPixels, 0, this.argbPixels.length);
+        this.ciPixels = new byte[this.argbPixels.length];
+    }
+
+    Object getPixelSource() {
+        return this.argbPixels;
+    }
+}
