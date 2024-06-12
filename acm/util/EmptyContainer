@@ -1,0 +1,18 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Container;
+import java.awt.Graphics;
+
+class EmptyContainer extends Container {
+    EmptyContainer() {
+    }
+
+    public void update(Graphics var1) {
+        this.paint(var1);
+    }
+}
