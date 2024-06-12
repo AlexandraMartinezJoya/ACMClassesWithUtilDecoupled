@@ -1,0 +1,28 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Container;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
+
+class MovieClipListener implements ComponentListener {
+    MovieClipListener() {
+    }
+
+    public void componentResized(ComponentEvent var1) {
+        ((Container)var1.getSource()).validate();
+    }
+
+    public void componentHidden(ComponentEvent var1) {
+    }
+
+    public void componentMoved(ComponentEvent var1) {
+    }
+
+    public void componentShown(ComponentEvent var1) {
+    }
+}
