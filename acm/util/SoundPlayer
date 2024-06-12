@@ -1,0 +1,121 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.FloatControl;
+import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.DataLine.Info;
+import javax.sound.sampled.FloatControl.Type;
+
+class SoundPlayer implements Runnable {
+    private static final int PADDING = 400;
+    private static final int BYTES_PER_SAMPLE = 2;
+    private static final int MAX_BUFFER_SIZE = 4096;
+    private static final double EPSILON = 1.0E-6D;
+    private SoundClip soundClip;
+    private Thread thread;
+    private boolean looping;
+    private double oldVolume;
+
+    public SoundPlayer(SoundClip var1) {
+        this.soundClip = var1;
+        this.oldVolume = 1.0D;
+    }
+
+    public void play() {
+        if (this.thread == null) {
+            this.looping = false;
+            this.thread = new Thread(this);
+            this.thread.start();
+        }
+    }
+
+    public void loop() {
+        if (this.thread == null) {
+            this.looping = true;
+            this.thread = new Thread(this);
+            this.thread.start();
+        }
+    }
+
+    public void stop() {
+        if (this.thread != null) {
+            this.looping = false;
+            this.thread = null;
+        }
+    }
+
+    public void run() {
+        byte[] var1 = this.soundClip.getData();
+        int var2 = this.soundClip.getChannelCount();
+        int var3 = this.soundClip.getFrameIndex() * var2 * 2;
+        int var4 = this.soundClip.getFrameCount() * var2 * 2;
+        SourceDataLine var5 = this.openSourceDataLine(Math.min(4096, var4));
+        var5.start();
+
+        while(this.thread != null) {
+            int var8;
+            for(int var6 = var4 - var3; this.thread != null && var6 > 0; var6 -= var8) {
+                this.setLineVolume(var5, this.soundClip.getVolume());
+                int var7 = Math.min(4096, var6);
+                var8 = var5.write(var1, var3, var7);
+                var3 += var8;
+            }
+
+            if (!this.looping) {
+                break;
+            }
+
+            var3 = 0;
+        }
+
+        if (this.thread == null) {
+            this.soundClip.setFrameIndex(var3 / var2 / 2);
+        }
+
+        var1 = new byte[400];
+        var5.write(var1, 0, var1.length);
+        var5.drain();
+        var5.stop();
+        var5.close();
+        this.thread = null;
+    }
+
+    private SourceDataLine openSourceDataLine(int var1) {
+        try {
+            AudioFormat var2 = this.soundClip.getFormat();
+            Class var3 = Class.forName("javax.sound.sampled.SourceDataLine");
+            Info var4 = new Info(var3, var2);
+            if (!AudioSystem.isLineSupported(var4)) {
+                throw new ErrorException("SoundClip: Unsupported data line format");
+            } else {
+                SourceDataLine var5 = (SourceDataLine)AudioSystem.getLine(var4);
+                var5.open(var2, var1);
+                return var5;
+            }
+        } catch (Exception var6) {
+            throw new ErrorException(var6);
+        }
+    }
+
+    private void setLineVolume(SourceDataLine var1, double var2) {
+        if (this.oldVolume != var2) {
+            this.oldVolume = var2;
+            FloatControl var4;
+            if (var1.isControlSupported(Type.VOLUME)) {
+                var4 = (FloatControl)var1.getControl(Type.VOLUME);
+                var4.setValue((float)var2);
+            } else if (var1.isControlSupported(Type.MASTER_GAIN)) {
+                var4 = (FloatControl)var1.getControl(Type.MASTER_GAIN);
+                double var5 = 20.0D * Math.log(Math.max(var2, 1.0E-6D)) / Math.log(10.0D);
+                var4.setValue((float)var5);
+            }
+
+        }
+    }
+}
