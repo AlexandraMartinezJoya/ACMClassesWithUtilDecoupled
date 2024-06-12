@@ -1,0 +1,249 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+class GifPixelsEncoder {
+    private static final int EOF = -1;
+    private int imgW;
+    private int imgH;
+    private byte[] pixAry;
+    private boolean wantInterlaced;
+    private int initCodeSize;
+    private int countDown;
+    private int xCur;
+    private int yCur;
+    private int curPass;
+    static final int BITS = 12;
+    static final int HSIZE = 5003;
+    int n_bits;
+    int maxbits = 12;
+    int maxcode;
+    int maxmaxcode = 4096;
+    int[] htab = new int[5003];
+    int[] codetab = new int[5003];
+    int hsize = 5003;
+    int free_ent = 0;
+    boolean clear_flg = false;
+    int g_init_bits;
+    int ClearCode;
+    int EOFCode;
+    int cur_accum = 0;
+    int cur_bits = 0;
+    int[] masks = new int[]{0, 1, 3, 7, 15, 31, 63, 127, 255, 511, 1023, 2047, 4095, 8191, 16383, 32767, 65535};
+    int a_count;
+    byte[] accum = new byte[256];
+
+    GifPixelsEncoder(int var1, int var2, byte[] var3, boolean var4, int var5) {
+        this.imgW = var1;
+        this.imgH = var2;
+        this.pixAry = var3;
+        this.wantInterlaced = var4;
+        this.initCodeSize = Math.max(2, var5);
+    }
+
+    void encode(OutputStream var1) throws IOException {
+        var1.write(this.initCodeSize);
+        this.countDown = this.imgW * this.imgH;
+        this.xCur = this.yCur = this.curPass = 0;
+        this.compress(this.initCodeSize + 1, var1);
+        var1.write(0);
+    }
+
+    private void bumpPosition() {
+        ++this.xCur;
+        if (this.xCur == this.imgW) {
+            this.xCur = 0;
+            if (!this.wantInterlaced) {
+                ++this.yCur;
+            } else {
+                switch(this.curPass) {
+                case 0:
+                    this.yCur += 8;
+                    if (this.yCur >= this.imgH) {
+                        ++this.curPass;
+                        this.yCur = 4;
+                    }
+                    break;
+                case 1:
+                    this.yCur += 8;
+                    if (this.yCur >= this.imgH) {
+                        ++this.curPass;
+                        this.yCur = 2;
+                    }
+                    break;
+                case 2:
+                    this.yCur += 4;
+                    if (this.yCur >= this.imgH) {
+                        ++this.curPass;
+                        this.yCur = 1;
+                    }
+                    break;
+                case 3:
+                    this.yCur += 2;
+                }
+            }
+        }
+
+    }
+
+    private int nextPixel() {
+        if (this.countDown == 0) {
+            return -1;
+        } else {
+            --this.countDown;
+            byte var1 = this.pixAry[this.yCur * this.imgW + this.xCur];
+            this.bumpPosition();
+            return var1 & 255;
+        }
+    }
+
+    final int MAXCODE(int var1) {
+        return (1 << var1) - 1;
+    }
+
+    void compress(int var1, OutputStream var2) throws IOException {
+        this.g_init_bits = var1;
+        this.clear_flg = false;
+        this.n_bits = this.g_init_bits;
+        this.maxcode = this.MAXCODE(this.n_bits);
+        this.ClearCode = 1 << var1 - 1;
+        this.EOFCode = this.ClearCode + 1;
+        this.free_ent = this.ClearCode + 2;
+        this.char_init();
+        int var6 = this.nextPixel();
+        int var9 = 0;
+
+        int var3;
+        for(var3 = this.hsize; var3 < 65536; var3 *= 2) {
+            ++var9;
+        }
+
+        var9 = 8 - var9;
+        int var8 = this.hsize;
+        this.cl_hash(var8);
+        this.output(this.ClearCode, var2);
+
+        while(true) {
+            int var5;
+            label40:
+            while((var5 = this.nextPixel()) != -1) {
+                var3 = (var5 << this.maxbits) + var6;
+                int var4 = var5 << var9 ^ var6;
+                if (this.htab[var4] == var3) {
+                    var6 = this.codetab[var4];
+                } else {
+                    if (this.htab[var4] >= 0) {
+                        int var7 = var8 - var4;
+                        if (var4 == 0) {
+                            var7 = 1;
+                        }
+
+                        do {
+                            if ((var4 -= var7) < 0) {
+                                var4 += var8;
+                            }
+
+                            if (this.htab[var4] == var3) {
+                                var6 = this.codetab[var4];
+                                continue label40;
+                            }
+                        } while(this.htab[var4] >= 0);
+                    }
+
+                    this.output(var6, var2);
+                    var6 = var5;
+                    if (this.free_ent < this.maxmaxcode) {
+                        this.codetab[var4] = this.free_ent++;
+                        this.htab[var4] = var3;
+                    } else {
+                        this.cl_block(var2);
+                    }
+                }
+            }
+
+            this.output(var6, var2);
+            this.output(this.EOFCode, var2);
+            return;
+        }
+    }
+
+    void output(int var1, OutputStream var2) throws IOException {
+        this.cur_accum &= this.masks[this.cur_bits];
+        if (this.cur_bits > 0) {
+            this.cur_accum |= var1 << this.cur_bits;
+        } else {
+            this.cur_accum = var1;
+        }
+
+        for(this.cur_bits += this.n_bits; this.cur_bits >= 8; this.cur_bits -= 8) {
+            this.char_out((byte)(this.cur_accum & 255), var2);
+            this.cur_accum >>= 8;
+        }
+
+        if (this.free_ent > this.maxcode || this.clear_flg) {
+            if (this.clear_flg) {
+                this.maxcode = this.MAXCODE(this.n_bits = this.g_init_bits);
+                this.clear_flg = false;
+            } else {
+                ++this.n_bits;
+                if (this.n_bits == this.maxbits) {
+                    this.maxcode = this.maxmaxcode;
+                } else {
+                    this.maxcode = this.MAXCODE(this.n_bits);
+                }
+            }
+        }
+
+        if (var1 == this.EOFCode) {
+            while(this.cur_bits > 0) {
+                this.char_out((byte)(this.cur_accum & 255), var2);
+                this.cur_accum >>= 8;
+                this.cur_bits -= 8;
+            }
+
+            this.flush_char(var2);
+        }
+
+    }
+
+    void cl_block(OutputStream var1) throws IOException {
+        this.cl_hash(this.hsize);
+        this.free_ent = this.ClearCode + 2;
+        this.clear_flg = true;
+        this.output(this.ClearCode, var1);
+    }
+
+    void cl_hash(int var1) {
+        for(int var2 = 0; var2 < var1; ++var2) {
+            this.htab[var2] = -1;
+        }
+
+    }
+
+    void char_init() {
+        this.a_count = 0;
+    }
+
+    void char_out(byte var1, OutputStream var2) throws IOException {
+        this.accum[this.a_count++] = var1;
+        if (this.a_count >= 254) {
+            this.flush_char(var2);
+        }
+
+    }
+
+    void flush_char(OutputStream var1) throws IOException {
+        if (this.a_count > 0) {
+            var1.write(this.a_count);
+            var1.write(this.accum, 0, this.a_count);
+            this.a_count = 0;
+        }
+
+    }
+}
