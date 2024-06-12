@@ -1,0 +1,41 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Image;
+import java.io.File;
+import java.util.Iterator;
+import javax.imageio.ImageIO;
+
+class GIFImageSaver extends ImageSaver {
+    private GIF89ImageSaver gif89Saver;
+
+    public GIFImageSaver() {
+        super("GIF", 2);
+        Iterator var1 = ImageIO.getImageWritersBySuffix("gif");
+        if (!var1.hasNext()) {
+            this.gif89Saver = new GIF89ImageSaver();
+        }
+
+    }
+
+    public void saveImage(Image var1) {
+        if (this.gif89Saver != null) {
+            this.gif89Saver.setOutputStream(this.getOutputStream());
+            this.gif89Saver.saveImage(var1);
+        } else {
+            super.saveImage(var1);
+        }
+
+    }
+
+    public void updateFileType(File var1) {
+        if (this.gif89Saver != null) {
+            this.gif89Saver.updateFileType(var1);
+        }
+
+    }
+}
