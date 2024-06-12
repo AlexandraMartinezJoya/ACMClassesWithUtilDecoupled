@@ -1,0 +1,37 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+
+class ErrorWindow extends Component {
+    private String movieName;
+    private String errorMessage;
+
+    public ErrorWindow(String var1, String var2) {
+        this.movieName = var1;
+        this.errorMessage = var2;
+    }
+
+    public void paint(Graphics var1) {
+        Dimension var2 = this.getSize();
+        FontMetrics var3 = var1.getFontMetrics();
+        var1.setColor(Color.WHITE);
+        var1.fillRect(0, 0, var2.width, var2.height);
+        var1.setColor(Color.BLACK);
+        int var4 = (var2.width - var3.stringWidth(this.movieName)) / 2;
+        int var5 = var2.height / 2 - var3.getHeight();
+        var1.drawString(this.movieName, var4, var5);
+        var1.setColor(Color.RED);
+        var4 = (var2.width - var3.stringWidth(this.errorMessage)) / 2;
+        var5 += 2 * var3.getHeight();
+        var1.drawString(this.errorMessage, var4, var5);
+    }
+}
