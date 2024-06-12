@@ -1,0 +1,42 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+class ReverseColorMap {
+    private static final int HCAPACITY = 2053;
+    private ReverseColorMap.ColorRecord[] hTable = new ReverseColorMap.ColorRecord[2053];
+
+    ReverseColorMap() {
+    }
+
+    int getPaletteIndex(int var1) {
+        ReverseColorMap.ColorRecord var2;
+        for(int var3 = var1 % this.hTable.length; (var2 = this.hTable[var3]) != null && var2.rgb != var1; var3 %= this.hTable.length) {
+            ++var3;
+        }
+
+        return var2 != null ? var2.ipalette : -1;
+    }
+
+    void put(int var1, int var2) {
+        int var3;
+        for(var3 = var1 % this.hTable.length; this.hTable[var3] != null; var3 %= this.hTable.length) {
+            ++var3;
+        }
+
+        this.hTable[var3] = new ReverseColorMap.ColorRecord(var1, var2);
+    }
+
+    private static class ColorRecord {
+        int rgb;
+        int ipalette;
+
+        ColorRecord(int var1, int var2) {
+            this.rgb = var1;
+            this.ipalette = var2;
+        }
+    }
+}
