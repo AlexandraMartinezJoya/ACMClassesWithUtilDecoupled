@@ -1,0 +1,12 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+class BMPImageSaver extends ImageSaver {
+    public BMPImageSaver() {
+        super("BMP", 1);
+    }
+}
