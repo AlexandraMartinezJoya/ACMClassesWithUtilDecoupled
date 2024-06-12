@@ -1,0 +1,19 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+class IndexGif89Frame extends Gif89Frame {
+    public IndexGif89Frame(int var1, int var2, byte[] var3) {
+        this.theWidth = var1;
+        this.theHeight = var2;
+        this.ciPixels = new byte[this.theWidth * this.theHeight];
+        System.arraycopy(var3, 0, this.ciPixels, 0, this.ciPixels.length);
+    }
+
+    Object getPixelSource() {
+        return this.ciPixels;
+    }
+}
