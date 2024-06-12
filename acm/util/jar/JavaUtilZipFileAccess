@@ -1,0 +1,19 @@
+package acm.util.jar;
+
+import acm.util.Enumeration;
+import acm.util.List;
+import acm.util.stream.Stream;
+
+
+public interface JavaUtilZipFileAccess {
+    public boolean startsWithLocHeader(acm.util.zip.ZipFile zip);
+    public List<String> getManifestAndSignatureRelatedFiles(acm.util.jar.JarFile zip);
+    public String getManifestName(acm.util.jar.JarFile zip, boolean onlyIfSignatureRelatedFiles);
+    public int getManifestNum(acm.util.jar.JarFile zip);
+    public int[] getMetaInfVersions(acm.util.jar.JarFile zip);
+    public Enumeration<JarEntry> entries(acm.util.zip.ZipFile zip);
+    public Stream<JarEntry> stream(acm.util.zip.ZipFile zip);
+    public Stream<String> entryNameStream(acm.util.zip.ZipFile zip);
+    public void setExtraAttributes(acm.util.zip.ZipEntry ze, int extraAttrs);
+    public int getExtraAttributes(acm.util.zip.ZipEntry ze);
+}
