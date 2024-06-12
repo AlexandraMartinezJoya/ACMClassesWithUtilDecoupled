@@ -1,0 +1,29 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.io.IOException;
+import java.io.OutputStream;
+
+final class Gif89Put {
+    Gif89Put() {
+    }
+
+    static void ascii(String var0, OutputStream var1) throws IOException {
+        byte[] var2 = new byte[var0.length()];
+
+        for(int var3 = 0; var3 < var2.length; ++var3) {
+            var2[var3] = (byte)var0.charAt(var3);
+        }
+
+        var1.write(var2);
+    }
+
+    static void leShort(int var0, OutputStream var1) throws IOException {
+        var1.write(var0 & 255);
+        var1.write(var0 >> 8 & 255);
+    }
+}
