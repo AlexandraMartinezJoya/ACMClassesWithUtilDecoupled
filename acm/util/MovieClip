@@ -1,0 +1,460 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+
+public class MovieClip extends Container {
+    private static final int MIN_QUICKTIME_VERSION = 7;
+    private static final int CONTROLLER_HEIGHT = 16;
+    private static final int DEFAULT_TIME_SCALE = 600;
+    private static final Dimension DEFAULT_SIZE = new Dimension(300, 200);
+    private Class<?> movieClass;
+    private Class<?> movieControllerClass;
+    private Class<?> openMovieFileClass;
+    private Class<?> qdRectClass;
+    private Class<?> qtDataRefClass;
+    private Class<?> qtFactoryClass;
+    private Class<?> qtFileClass;
+    private Class<?> qtSessionClass;
+    private Class<?> timeRecordClass;
+    private Object controller;
+    private Object movie;
+    private String movieName;
+    private String errorMessage;
+    private int version;
+    private boolean hasQuickTime;
+    private boolean controllerVisible;
+    private double clipVolume;
+    private double clipRate;
+    private static Object lock = new Object();
+
+    public MovieClip(String var1) {
+        this(var1, var1);
+    }
+
+    public MovieClip(File var1) {
+        this(var1, var1.getName());
+    }
+
+    public MovieClip(URL var1) {
+        this(var1, JTFTools.getURLSuffix(var1.toString()));
+    }
+
+    public void play() {
+        this.setLooping(false);
+        this.startMovie();
+    }
+
+    public void loop() {
+        this.setLooping(true);
+        this.startMovie();
+    }
+
+    public synchronized void stop() {
+        this.stopMovie();
+        this.setLooping(false);
+    }
+
+    public String getName() {
+        return this.movieName;
+    }
+
+    public void setName(String var1) {
+        this.movieName = var1;
+    }
+
+    public int getFrameCount() {
+        return this.getQTDuration();
+    }
+
+    public double getFrameRate() {
+        return (double)this.getQTTimeScale();
+    }
+
+    public double getDuration() {
+        return (double)this.getFrameCount() / this.getFrameRate();
+    }
+
+    public int getFrameIndex() {
+        return this.getCurrentTime();
+    }
+
+    public void setFrameIndex(int var1) {
+        this.setCurrentTime(var1);
+    }
+
+    public void rewind() {
+        this.setFrameIndex(0);
+    }
+
+    public double getVolume() {
+        return this.clipVolume;
+    }
+
+    public void setVolume(double var1) {
+        this.clipVolume = var1;
+        this.setControllerVolume(var1);
+    }
+
+    public double getPlaybackRate() {
+        return this.clipRate;
+    }
+
+    public void setPlaybackRate(double var1) {
+        this.clipRate = var1;
+        if (!this.isStopped()) {
+            this.setRate(var1);
+        }
+
+    }
+
+    public void enableController() {
+        if (this.hasQuickTime) {
+            this.setControllerVisible(true);
+        }
+
+    }
+
+    public void disableController() {
+        if (this.hasQuickTime) {
+            this.setControllerVisible(false);
+        }
+
+    }
+
+    public boolean isControllerEnabled() {
+        return this.controllerVisible;
+    }
+
+    public int getControllerHeight() {
+        return this.controller == null ? 0 : 16;
+    }
+
+    public Dimension getPreferredSize() {
+        if (this.movie == null) {
+            return DEFAULT_SIZE;
+        } else {
+            try {
+                Method var1 = this.movieClass.getMethod("getNaturalBoundsRect");
+                Method var2 = this.qdRectClass.getMethod("getWidth");
+                Method var3 = this.qdRectClass.getMethod("getHeight");
+                Object var4 = var1.invoke(this.movie);
+                int var5 = (Integer)var2.invoke(var4);
+                int var6 = (Integer)var3.invoke(var4);
+                Dimension var7 = new Dimension(var5, var6 + this.getControllerHeight());
+                return var7;
+            } catch (Exception var8) {
+                throw new ErrorException(var8);
+            }
+        }
+    }
+
+    private MovieClip(Object var1, String var2) {
+        this.startQuickTime();
+        this.movieName = var2;
+        this.clipVolume = 1.0D;
+        this.clipRate = 1.0D;
+        this.setLayout(new BorderLayout());
+        if (this.hasQuickTime) {
+            try {
+                this.readMovie(var1);
+            } catch (Exception var4) {
+                this.add(new ErrorWindow(var2, "Can't read movie file"), "Center");
+            }
+        } else {
+            this.add(new ErrorWindow(var2, this.errorMessage), "Center");
+        }
+
+        this.addComponentListener(new MovieClipListener());
+    }
+
+    private void startQuickTime() {
+        this.hasQuickTime = false;
+
+        try {
+            this.movieClass = Class.forName("quicktime.std.movies.Movie");
+            this.movieControllerClass = Class.forName("quicktime.std.movies.MovieController");
+            this.openMovieFileClass = Class.forName("quicktime.io.OpenMovieFile");
+            this.qdRectClass = Class.forName("quicktime.qd.QDRect");
+            this.qtDataRefClass = Class.forName("quicktime.std.movies.media.DataRef");
+            this.qtFactoryClass = Class.forName("quicktime.app.view.QTFactory");
+            this.qtFileClass = Class.forName("quicktime.io.QTFile");
+            this.qtSessionClass = Class.forName("quicktime.QTSession");
+            this.timeRecordClass = Class.forName("quicktime.std.clocks.TimeRecord");
+            Method var1 = this.qtSessionClass.getMethod("isInitialized");
+            synchronized(lock) {
+                if (var1.invoke((Object)null).equals(Boolean.FALSE)) {
+                    Method var3 = this.qtSessionClass.getMethod("open");
+                    var3.invoke((Object)null);
+                }
+            }
+
+            Method var2 = this.qtSessionClass.getMethod("getMajorVersion");
+            this.version = (Integer)var2.invoke((Object)null);
+            if (this.version < 7) {
+                throw new ErrorException("MovieClip requires QuickTime V7 or later");
+            }
+
+            this.hasQuickTime = true;
+        } catch (Exception var6) {
+            this.errorMessage = var6.getMessage();
+        }
+
+    }
+
+    private void startMovie() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var1 = new Class[]{Float.TYPE};
+                Object[] var2 = new Object[]{new Float((float)this.clipRate)};
+                Method var3 = this.movieControllerClass.getMethod("play", var1);
+                var3.invoke(this.controller, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+    }
+
+    private void stopMovie() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var1 = new Class[]{Float.TYPE};
+                Object[] var2 = new Object[]{new Float(0.0D)};
+                Method var3 = this.movieControllerClass.getMethod("play", var1);
+                var3.invoke(this.controller, var2);
+            } catch (Exception var4) {
+                throw new ErrorException(var4);
+            }
+        }
+    }
+
+    private void setLooping(boolean var1) {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var2 = new Class[]{Boolean.TYPE};
+                Object[] var3 = new Object[]{new Boolean(var1)};
+                Method var4 = this.movieControllerClass.getMethod("setLooping", var2);
+                var4.invoke(this.controller, var3);
+            } catch (Exception var5) {
+                throw new ErrorException(var5);
+            }
+        }
+    }
+
+    private void readMovie(Object var1) {
+        try {
+            if (var1 instanceof String) {
+                String var2 = (String)var1;
+                if (var2.startsWith("http:")) {
+                    try {
+                        this.movie = this.readMovieFromURL(new URL(var2));
+                    } catch (MalformedURLException var4) {
+                        throw new ErrorException("MovieClip: Malformed URL");
+                    }
+                } else {
+                    this.movie = this.readMovieFromFile(new File(var2));
+                }
+            } else if (var1 instanceof File) {
+                this.movie = this.readMovieFromFile((File)var1);
+            } else if (var1 instanceof URL) {
+                this.movie = this.readMovieFromURL((URL)var1);
+            }
+
+            this.controller = this.createController();
+            this.controllerVisible = true;
+            this.addQTComponent(this.controller);
+        } catch (Exception var5) {
+            throw new ErrorException(var5);
+        }
+    }
+
+    private Object createController() throws Exception {
+        Class[] var1 = new Class[]{this.movie.getClass()};
+        Object[] var2 = new Object[]{this.movie};
+        Constructor var3 = this.movieControllerClass.getConstructor(var1);
+        return var3.newInstance(var2);
+    }
+
+    private void addQTComponent(Object var1) throws Exception {
+        if (!(var1 instanceof Component)) {
+            Class[] var2 = new Class[]{var1.getClass()};
+            Object[] var3 = new Object[]{var1};
+            Method var4 = this.qtFactoryClass.getMethod("makeQTComponent", var2);
+            var1 = var4.invoke((Object)null, var3);
+            if (!(var1 instanceof Component)) {
+                Class var5 = var1.getClass();
+                Method var6 = var5.getMethod("asComponent");
+                var1 = var6.invoke(var1);
+            }
+        }
+
+        this.removeAll();
+        this.add((Component)var1, "Center");
+    }
+
+    private Object readMovieFromFile(File var1) {
+        try {
+            Class[] var2 = new Class[]{Class.forName("java.io.File")};
+            Object[] var3 = new Object[]{var1};
+            Constructor var4 = this.qtFileClass.getConstructor(var2);
+            Object var5 = var4.newInstance(var3);
+            Class[] var6 = new Class[]{this.qtFileClass};
+            Object[] var7 = new Object[]{var5};
+            Method var8 = this.openMovieFileClass.getMethod("asRead", var6);
+            Object var9 = var8.invoke((Object)null, var7);
+            Class[] var10 = new Class[]{this.openMovieFileClass};
+            Object[] var11 = new Object[]{var9};
+            Method var12 = this.movieClass.getMethod("fromFile", var10);
+            return var12.invoke((Object)null, var11);
+        } catch (Exception var13) {
+            throw new ErrorException(var13);
+        }
+    }
+
+    private Object readMovieFromURL(URL var1) {
+        try {
+            Class[] var2 = new Class[]{Class.forName("java.lang.String")};
+            Object[] var3 = new Object[]{var1.toString()};
+            Constructor var4 = this.qtDataRefClass.getConstructor(var2);
+            Object var5 = var4.newInstance(var3);
+            Class[] var6 = new Class[]{this.qtDataRefClass, Integer.TYPE};
+            Object[] var7 = new Object[]{var5, new Integer(0)};
+            Method var8 = this.movieClass.getMethod("fromDataRef", var6);
+            return var8.invoke((Object)null, var7);
+        } catch (Exception var9) {
+            throw new ErrorException(var9);
+        }
+    }
+
+    private void setControllerVisible(boolean var1) {
+        if (this.hasQuickTime && this.movie != null) {
+            if (var1 != this.controllerVisible) {
+                try {
+                    Class[] var2 = new Class[]{Boolean.TYPE};
+                    Object[] var3 = new Object[]{new Boolean(var1)};
+                    Method var4 = this.movieControllerClass.getMethod("setVisible", var2);
+                    var4.invoke(this.controller, var3);
+                } catch (Exception var5) {
+                    throw new ErrorException(var5);
+                }
+
+                this.controllerVisible = var1;
+            }
+
+        }
+    }
+
+    private int getCurrentTime() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Method var1 = this.movieControllerClass.getMethod("getCurrentTime");
+                return (Integer)var1.invoke(this.controller);
+            } catch (Exception var2) {
+                throw new ErrorException(var2);
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    private void setCurrentTime(int var1) {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var2 = new Class[]{this.timeRecordClass};
+                Object[] var3 = new Object[]{this.createTimeRecord(var1)};
+                Method var4 = this.movieControllerClass.getMethod("goToTime", var2);
+                var4.invoke(this.controller, var3);
+            } catch (Exception var5) {
+                throw new ErrorException(var5);
+            }
+        }
+    }
+
+    private void setControllerVolume(double var1) {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var3 = new Class[]{Float.TYPE};
+                Object[] var4 = new Object[]{new Float((float)var1)};
+                Method var5 = this.movieControllerClass.getMethod("setVolume", var3);
+                var5.invoke(this.controller, var4);
+            } catch (Exception var6) {
+                throw new ErrorException(var6);
+            }
+        }
+    }
+
+    private void setRate(double var1) {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Class[] var3 = new Class[]{Float.TYPE};
+                Object[] var4 = new Object[]{new Float((float)var1)};
+                Method var5 = this.movieClass.getMethod("setRate", var3);
+                var5.invoke(this.movie, var4);
+            } catch (Exception var6) {
+                throw new ErrorException(var6);
+            }
+        }
+    }
+
+    private boolean isStopped() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Method var1 = this.movieControllerClass.getMethod("getPlayRate");
+                return (double)(Float)var1.invoke(this.controller) == 0.0D;
+            } catch (Exception var2) {
+                throw new ErrorException(var2);
+            }
+        } else {
+            return true;
+        }
+    }
+
+    private int getQTDuration() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Method var1 = this.movieClass.getMethod("getDuration");
+                return (Integer)var1.invoke(this.movie);
+            } catch (Exception var2) {
+                throw new ErrorException(var2);
+            }
+        } else {
+            return 0;
+        }
+    }
+
+    private int getQTTimeScale() {
+        if (this.hasQuickTime && this.movie != null) {
+            try {
+                Method var1 = this.movieClass.getMethod("getTimeScale");
+                return (Integer)var1.invoke(this.movie);
+            } catch (Exception var2) {
+                throw new ErrorException(var2);
+            }
+        } else {
+            return 600;
+        }
+    }
+
+    private Object createTimeRecord(int var1) {
+        try {
+            Class[] var2 = new Class[]{Integer.TYPE, Long.TYPE};
+            Object[] var3 = new Object[]{new Integer(this.getQTTimeScale()), new Long((long)var1)};
+            Constructor var4 = this.timeRecordClass.getConstructor(var2);
+            return var4.newInstance(var3);
+        } catch (Exception var5) {
+            throw new ErrorException(var5);
+        }
+    }
+}
