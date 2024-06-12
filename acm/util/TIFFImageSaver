@@ -1,0 +1,227 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Image;
+
+class TIFFImageSaver extends ImageSaver {
+    private static final int HEADER_SIZE = 8;
+    private static final int IFD_OP_COUNT = 13;
+    public static final int TT_BYTE = 1;
+    public static final int TT_ASCII = 2;
+    public static final int TT_SHORT = 3;
+    public static final int TT_LONG = 4;
+    public static final int TT_RATIONAL = 5;
+    private int[][] pixels;
+    private int width;
+    private int height;
+    private int offsetIFD;
+    private int offsetNullIFD;
+    private int offsetBitsPerSample;
+    private int offsetXResolution;
+    private int offsetYResolution;
+    private int offsetStripPointers;
+    private int offsetStripByteCounts;
+    private int offsetData;
+    private int stripDelta;
+
+    TIFFImageSaver() {
+    }
+
+    public void saveImage(Image var1) {
+        this.pixels = MediaTools.getPixelArray(var1);
+        this.width = this.pixels[0].length;
+        this.height = this.pixels.length;
+        this.calculateOffsets();
+        this.dumpHeader();
+        this.dumpIFD();
+        this.dumpNullIFD();
+        this.dumpBitsPerSampleData();
+        this.dumpResolutionData();
+        this.dumpStripPointers();
+        this.dumpStripByteCounts();
+        this.dumpStripData();
+    }
+
+    private void dumpHeader() {
+        this.dumpByte(77);
+        this.dumpByte(77);
+        this.dumpShort(42);
+        this.dumpLong(8);
+    }
+
+    private void dumpIFD() {
+        this.dumpShort(13);
+        this.dumpIFDNewSubFileType();
+        this.dumpIFDImageWidth();
+        this.dumpIFDImageHeight();
+        this.dumpIFDBitsPerSample();
+        this.dumpIFDCompression();
+        this.dumpIFDPhotometricInterpration();
+        this.dumpIFDStripPointers();
+        this.dumpIFDSamplesPerPixel();
+        this.dumpIFDRowsPerStrip();
+        this.dumpIFDStripByteCounts();
+        this.dumpIFDXResolution();
+        this.dumpIFDYResolution();
+        this.dumpIFDResolutionUnit();
+    }
+
+    private void dumpIFDNewSubFileType() {
+        this.dumpShort(254);
+        this.dumpShort(4);
+        this.dumpLong(1);
+        this.dumpLong(0);
+    }
+
+    private void dumpIFDImageWidth() {
+        this.dumpShort(256);
+        this.dumpShort(4);
+        this.dumpLong(1);
+        this.dumpLong(this.width);
+    }
+
+    private void dumpIFDImageHeight() {
+        this.dumpShort(257);
+        this.dumpShort(4);
+        this.dumpLong(1);
+        this.dumpLong(this.height);
+    }
+
+    private void dumpIFDBitsPerSample() {
+        this.dumpShort(258);
+        this.dumpShort(4);
+        this.dumpLong(3);
+        this.dumpLong(this.offsetBitsPerSample);
+    }
+
+    private void dumpIFDCompression() {
+        this.dumpShort(259);
+        this.dumpShort(3);
+        this.dumpLong(1);
+        this.dumpShort(1);
+        this.dumpShort(0);
+    }
+
+    private void dumpIFDPhotometricInterpration() {
+        this.dumpShort(262);
+        this.dumpShort(3);
+        this.dumpLong(1);
+        this.dumpShort(2);
+        this.dumpShort(0);
+    }
+
+    private void dumpIFDStripPointers() {
+        this.dumpShort(273);
+        this.dumpShort(4);
+        this.dumpLong(this.height);
+        this.dumpLong(this.offsetStripPointers);
+    }
+
+    private void dumpIFDSamplesPerPixel() {
+        this.dumpShort(277);
+        this.dumpShort(3);
+        this.dumpLong(1);
+        this.dumpShort(3);
+        this.dumpShort(0);
+    }
+
+    private void dumpIFDRowsPerStrip() {
+        this.dumpShort(278);
+        this.dumpShort(4);
+        this.dumpLong(1);
+        this.dumpLong(1);
+    }
+
+    private void dumpIFDStripByteCounts() {
+        this.dumpShort(279);
+        this.dumpShort(4);
+        this.dumpLong(this.height);
+        this.dumpLong(this.offsetStripByteCounts);
+    }
+
+    private void dumpIFDXResolution() {
+        this.dumpShort(282);
+        this.dumpShort(5);
+        this.dumpLong(1);
+        this.dumpLong(this.offsetXResolution);
+    }
+
+    private void dumpIFDYResolution() {
+        this.dumpShort(283);
+        this.dumpShort(5);
+        this.dumpLong(1);
+        this.dumpLong(this.offsetYResolution);
+    }
+
+    private void dumpIFDResolutionUnit() {
+        this.dumpShort(296);
+        this.dumpShort(3);
+        this.dumpLong(1);
+        this.dumpShort(1);
+        this.dumpShort(0);
+    }
+
+    private void dumpNullIFD() {
+        this.dumpLong(0);
+    }
+
+    private void dumpBitsPerSampleData() {
+        this.dumpLong(8);
+        this.dumpLong(8);
+        this.dumpLong(8);
+    }
+
+    private void dumpResolutionData() {
+        this.dumpLong(72);
+        this.dumpLong(1);
+        this.dumpLong(72);
+        this.dumpLong(1);
+    }
+
+    private void dumpStripPointers() {
+        for(int var1 = 0; var1 < this.height; ++var1) {
+            this.dumpLong(this.offsetData + var1 * this.stripDelta);
+        }
+
+    }
+
+    private void dumpStripByteCounts() {
+        for(int var1 = 0; var1 < this.height; ++var1) {
+            this.dumpLong(3 * this.width);
+        }
+
+    }
+
+    private void dumpStripData() {
+        for(int var1 = 0; var1 < this.height; ++var1) {
+            int var2;
+            for(var2 = 0; var2 < this.width; ++var2) {
+                int var3 = this.pixels[var1][var2];
+                this.dumpByte(this.getPixelComponent(var3, 'R'));
+                this.dumpByte(this.getPixelComponent(var3, 'G'));
+                this.dumpByte(this.getPixelComponent(var3, 'B'));
+            }
+
+            for(var2 = 3 * this.width; var2 < this.stripDelta; ++var2) {
+                this.dumpByte(0);
+            }
+        }
+
+    }
+
+    private void calculateOffsets() {
+        this.offsetIFD = 8;
+        this.offsetNullIFD = this.offsetIFD + 156 + 2;
+        this.offsetBitsPerSample = this.offsetNullIFD + 4;
+        this.offsetXResolution = this.offsetBitsPerSample + 12;
+        this.offsetYResolution = this.offsetXResolution + 8;
+        this.offsetStripPointers = this.offsetYResolution + 8;
+        this.offsetStripByteCounts = this.offsetStripPointers + 4 * this.height;
+        this.offsetData = this.offsetStripByteCounts + 4 * this.height;
+        this.stripDelta = 3 * this.width + 3 & -4;
+    }
+}
