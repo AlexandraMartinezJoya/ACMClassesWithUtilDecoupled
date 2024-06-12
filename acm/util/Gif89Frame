@@ -1,0 +1,86 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Point;
+import java.io.IOException;
+import java.io.OutputStream;
+
+abstract class Gif89Frame {
+    public static final int DM_UNDEFINED = 0;
+    public static final int DM_LEAVE = 1;
+    public static final int DM_BGCOLOR = 2;
+    public static final int DM_REVERT = 3;
+    int theWidth = -1;
+    int theHeight = -1;
+    byte[] ciPixels;
+    private Point thePosition = new Point(0, 0);
+    private boolean isInterlaced;
+    private int csecsDelay;
+    private int disposalCode = 1;
+
+    public void setPosition(Point var1) {
+        this.thePosition = new Point(var1);
+    }
+
+    public void setInterlaced(boolean var1) {
+        this.isInterlaced = var1;
+    }
+
+    public void setDelay(int var1) {
+        this.csecsDelay = var1;
+    }
+
+    public void setDisposalMode(int var1) {
+        this.disposalCode = var1;
+    }
+
+    Gif89Frame() {
+    }
+
+    abstract Object getPixelSource();
+
+    int getWidth() {
+        return this.theWidth;
+    }
+
+    int getHeight() {
+        return this.theHeight;
+    }
+
+    byte[] getPixelSink() {
+        return this.ciPixels;
+    }
+
+    void encode(OutputStream var1, boolean var2, int var3, int var4) throws IOException {
+        this.writeGraphicControlExtension(var1, var2, var4);
+        this.writeImageDescriptor(var1);
+        (new GifPixelsEncoder(this.theWidth, this.theHeight, this.ciPixels, this.isInterlaced, var3)).encode(var1);
+    }
+
+    private void writeGraphicControlExtension(OutputStream var1, boolean var2, int var3) throws IOException {
+        int var4 = var3 == -1 ? 0 : 1;
+        if (var4 == 1 || var2) {
+            var1.write(33);
+            var1.write(249);
+            var1.write(4);
+            var1.write(this.disposalCode << 2 | var4);
+            Gif89Put.leShort(this.csecsDelay, var1);
+            var1.write(var3);
+            var1.write(0);
+        }
+
+    }
+
+    private void writeImageDescriptor(OutputStream var1) throws IOException {
+        var1.write(44);
+        Gif89Put.leShort(this.thePosition.x, var1);
+        Gif89Put.leShort(this.thePosition.y, var1);
+        Gif89Put.leShort(this.theWidth, var1);
+        Gif89Put.leShort(this.theHeight, var1);
+        var1.write(this.isInterlaced ? 64 : 0);
+    }
+}
