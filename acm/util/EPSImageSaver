@@ -1,0 +1,17 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Image;
+
+class EPSImageSaver extends ImageSaver {
+    EPSImageSaver() {
+    }
+
+    public void saveImage(Image var1) {
+        throw new ErrorException("saveImage: Not yet implemented");
+    }
+}
