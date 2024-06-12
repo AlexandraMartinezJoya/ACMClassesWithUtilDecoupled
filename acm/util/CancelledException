@@ -1,0 +1,11 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+public class CancelledException extends RuntimeException {
+    public CancelledException() {
+    }
+}
