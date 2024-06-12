@@ -1,0 +1,45 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+
+class PSPreviewImage extends Image {
+    private Image baseImage;
+    private String[] psPreview;
+
+    public PSPreviewImage(Image var1, String[] var2) {
+        this.baseImage = var1;
+        this.psPreview = var2;
+    }
+
+    public Graphics getGraphics() {
+        return this.baseImage.getGraphics();
+    }
+
+    public int getWidth(ImageObserver var1) {
+        return this.baseImage.getWidth(var1);
+    }
+
+    public int getHeight(ImageObserver var1) {
+        return this.baseImage.getHeight(var1);
+    }
+
+    public Object getProperty(String var1, ImageObserver var2) {
+        return var1.equals("PSPreview") ? this.psPreview : this.baseImage.getProperty(var1, var2);
+    }
+
+    public ImageProducer getSource() {
+        return this.baseImage.getSource();
+    }
+
+    public void flush() {
+        this.baseImage.flush();
+    }
+}
