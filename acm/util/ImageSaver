@@ -1,0 +1,101 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import javax.imageio.ImageIO;
+import javax.imageio.stream.MemoryCacheImageOutputStream;
+
+class ImageSaver {
+    private OutputStream out;
+    private String formatName;
+    private int bufferType;
+
+    public ImageSaver() {
+    }
+
+    public ImageSaver(String var1, int var2) {
+        this.formatName = var1;
+        this.bufferType = var2;
+    }
+
+    public void setOutputStream(OutputStream var1) {
+        this.out = var1;
+    }
+
+    public OutputStream getOutputStream() {
+        return this.out;
+    }
+
+    public void saveImage(Image var1) {
+        BufferedImage var2 = MediaTools.createBufferedImage(var1, this.bufferType);
+        MemoryCacheImageOutputStream var3 = new MemoryCacheImageOutputStream(this.getOutputStream());
+
+        try {
+            if (!ImageIO.write(var2, this.formatName, var3)) {
+                throw new IOException("ImageIO.write failed");
+            } else {
+                var3.close();
+            }
+        } catch (IOException var5) {
+            throw new ErrorException("saveImage: " + var5.getMessage());
+        }
+    }
+
+    public void updateFileType(File var1) {
+    }
+
+    public void dumpByte(int var1) {
+        try {
+            this.out.write(var1);
+        } catch (IOException var3) {
+            throw new ErrorException("saveImage: " + var3.getMessage());
+        }
+    }
+
+    public void dumpShort(int var1) {
+        try {
+            this.out.write(var1 >> 8);
+            this.out.write(var1);
+        } catch (IOException var3) {
+            throw new ErrorException("saveImage: " + var3.getMessage());
+        }
+    }
+
+    public void dumpLong(int var1) {
+        try {
+            this.out.write(var1 >> 24);
+            this.out.write(var1 >> 16);
+            this.out.write(var1 >> 8);
+            this.out.write(var1);
+        } catch (IOException var3) {
+            throw new ErrorException("saveImage: " + var3.getMessage());
+        }
+    }
+
+    public int getPixelComponent(int var1, char var2) {
+        int var3 = var1 >> 24 & 255;
+        switch(var2) {
+        case 'B':
+            break;
+        case 'G':
+            var1 >>= 8;
+            break;
+        case 'R':
+            var1 >>= 16;
+            break;
+        default:
+            throw new ErrorException("getPixelComponent: Illegal color");
+        }
+
+        var1 &= 255;
+        return (var3 * var1 + (255 - var3) * 255) / 255;
+    }
+}
