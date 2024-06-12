@@ -1,0 +1,126 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Color;
+import java.io.IOException;
+import java.io.OutputStream;
+
+class GifColorTable {
+    private int[] theColors = new int[256];
+    private int colorDepth;
+    private int transparentIndex = -1;
+    private int ciCount = 0;
+    private ReverseColorMap ciLookup;
+
+    GifColorTable() {
+        this.ciLookup = new ReverseColorMap();
+    }
+
+    GifColorTable(Color[] var1) {
+        int var2 = Math.min(this.theColors.length, var1.length);
+
+        for(int var3 = 0; var3 < var2; ++var3) {
+            this.theColors[var3] = var1[var3].getRGB();
+        }
+
+    }
+
+    int getDepth() {
+        return this.colorDepth;
+    }
+
+    int getTransparent() {
+        return this.transparentIndex;
+    }
+
+    void setTransparent(int var1) {
+        this.transparentIndex = var1;
+    }
+
+    void processPixels(Gif89Frame var1) throws IOException {
+        if (var1 instanceof DirectGif89Frame) {
+            this.filterPixels((DirectGif89Frame)var1);
+        } else {
+            this.trackPixelUsage((IndexGif89Frame)var1);
+        }
+
+    }
+
+    void closePixelProcessing() {
+        this.colorDepth = this.computeColorDepth(this.ciCount);
+    }
+
+    void encode(OutputStream var1) throws IOException {
+        int var2 = 1 << this.colorDepth;
+
+        for(int var3 = 0; var3 < var2; ++var3) {
+            var1.write(this.theColors[var3] >> 16 & 255);
+            var1.write(this.theColors[var3] >> 8 & 255);
+            var1.write(this.theColors[var3] & 255);
+        }
+
+    }
+
+    private void filterPixels(DirectGif89Frame var1) throws IOException {
+        if (this.ciLookup == null) {
+            throw new IOException("RGB frames require palette autodetection");
+        } else {
+            int[] var2 = (int[])((int[])var1.getPixelSource());
+            byte[] var3 = var1.getPixelSink();
+            int var4 = var2.length;
+
+            for(int var5 = 0; var5 < var4; ++var5) {
+                int var6 = var2[var5];
+                if (var6 >>> 24 < 128) {
+                    if (this.transparentIndex == -1) {
+                        this.transparentIndex = this.ciCount;
+                    } else if (var6 != this.theColors[this.transparentIndex]) {
+                        var3[var5] = (byte)this.transparentIndex;
+                        continue;
+                    }
+                }
+
+                int var7 = this.ciLookup.getPaletteIndex(var6 & 16777215);
+                if (var7 == -1) {
+                    if (this.ciCount == 256) {
+                        throw new IOException("can't encode as GIF (> 256 colors)");
+                    }
+
+                    this.theColors[this.ciCount] = var6;
+                    this.ciLookup.put(var6 & 16777215, this.ciCount);
+                    var3[var5] = (byte)this.ciCount;
+                    ++this.ciCount;
+                } else {
+                    var3[var5] = (byte)var7;
+                }
+            }
+
+        }
+    }
+
+    private void trackPixelUsage(IndexGif89Frame var1) {
+        byte[] var2 = (byte[])((byte[])var1.getPixelSource());
+        int var3 = var2.length;
+
+        for(int var4 = 0; var4 < var3; ++var4) {
+            if (var2[var4] >= this.ciCount) {
+                this.ciCount = var2[var4] + 1;
+            }
+        }
+
+    }
+
+    private int computeColorDepth(int var1) {
+        if (var1 <= 2) {
+            return 1;
+        } else if (var1 <= 4) {
+            return 2;
+        } else {
+            return var1 <= 16 ? 4 : 8;
+        }
+    }
+}
