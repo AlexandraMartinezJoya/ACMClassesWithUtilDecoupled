@@ -1,0 +1,16 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+public class ErrorException extends RuntimeException {
+    public ErrorException(String var1) {
+        super(var1);
+    }
+
+    public ErrorException(Exception var1) {
+        super(var1.getClass().getName() + ": " + var1.getMessage());
+    }
+}
