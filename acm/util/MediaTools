@@ -1,0 +1,536 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.applet.Applet;
+import java.applet.AudioClip;
+import java.awt.Component;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.MediaTracker;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.awt.image.ImageProducer;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.PixelGrabber;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.HashMap;
+import java.util.StringTokenizer;
+
+public class MediaTools {
+    public static final String DEFAULT_IMAGE_PATH = ".:images";
+    public static final String DEFAULT_AUDIO_PATH = ".:sounds";
+    public static final String DEFAULT_DATAFILE_PATH = ".:datafiles";
+    private static boolean cachingEnabled = false;
+    private static HashMap<String, Image> imageTable = new HashMap();
+    private static HashMap<String, AudioClip> audioClipTable = new HashMap();
+    private static HashMap<String, ImageSaver> suffixTable = new HashMap();
+    private static final Class<?> RESOURCE_CLASS = (new MediaTools()).getClass();
+
+    private MediaTools() {
+    }
+
+    public static Image loadImage(String var0) {
+        return loadImage(var0, ".:images");
+    }
+
+    public static Image loadImage(String var0, String var1) {
+        Image var2 = (Image)imageTable.get(var0);
+        if (var2 != null) {
+            return var2;
+        } else if (var0.startsWith("http:")) {
+            try {
+                var2 = loadImage(new URL(var0));
+                if (cachingEnabled) {
+                    imageTable.put(var0, var2);
+                }
+
+                return var2;
+            } catch (MalformedURLException var10) {
+                throw new ErrorException("loadImage: Malformed URL");
+            }
+        } else {
+            Toolkit var3 = Toolkit.getDefaultToolkit();
+            StringTokenizer var4 = new StringTokenizer(var1, ":");
+
+            while(var2 == null && var4.hasMoreTokens()) {
+                String var5 = var4.nextToken();
+                var5 = var5.equals(".") ? "" : var5 + "/";
+                URL var6 = null;
+
+                try {
+                    var6 = RESOURCE_CLASS.getResource("/" + var5 + var0);
+                    URLConnection var7 = var6.openConnection();
+                    if (var7 == null || var7.getContentLength() <= 0) {
+                        var6 = null;
+                    }
+                } catch (Exception var13) {
+                }
+
+                if (var6 == null) {
+                    Applet var14 = JTFTools.getApplet();
+                    if (var14 != null) {
+                        URL var8 = var14.getCodeBase();
+                        if (var8 != null) {
+                            try {
+                                var6 = new URL(var8, var5 + var0);
+                            } catch (MalformedURLException var12) {
+                            }
+                        }
+                    }
+                }
+
+                if (var6 == null) {
+                    try {
+                        if ((new File(var5 + var0)).canRead()) {
+                            var2 = var3.getImage(var5 + var0);
+                        }
+                    } catch (SecurityException var11) {
+                    }
+                } else {
+                    var2 = loadImage(var6, false);
+                }
+            }
+
+            if (var2 == null) {
+                throw new ErrorException("Cannot find an image named " + var0);
+            } else {
+                loadImage(var2);
+                if (cachingEnabled) {
+                    imageTable.put(var0, var2);
+                }
+
+                return var2;
+            }
+        }
+    }
+
+    public static Image loadImage(URL var0) {
+        return loadImage(var0, true);
+    }
+
+    public static Image loadImage(Image var0) {
+        MediaTracker var1 = new MediaTracker(JTFTools.createEmptyContainer());
+        var1.addImage(var0, 0);
+
+        try {
+            var1.waitForID(0);
+            return var0;
+        } catch (InterruptedException var3) {
+            throw new ErrorException("Image loading process interrupted");
+        }
+    }
+
+    public static void defineImage(String var0, Image var1) {
+        imageTable.put(var0, var1);
+    }
+
+    public static void flushImage(String var0) {
+        imageTable.remove(var0);
+    }
+
+    public static Image createImage(int[][] var0) {
+        int var1 = var0.length;
+        int var2 = var0[0].length;
+        int[] var3 = new int[var2 * var1];
+
+        for(int var4 = 0; var4 < var1; ++var4) {
+            System.arraycopy(var0[var4], 0, var3, var4 * var2, var2);
+        }
+
+        return createImage(var3, var2, var1);
+    }
+
+    public static Image createImage(int[] var0, int var1, int var2) {
+        Image var3 = Toolkit.getDefaultToolkit().createImage(new MemoryImageSource(var1, var2, var0, 0, var1));
+        loadImage(var3);
+        return var3;
+    }
+
+    public static Image createImage(InputStream var0) {
+        try {
+            ByteArrayOutputStream var1 = new ByteArrayOutputStream();
+
+            for(int var2 = var0.read(); var2 != -1; var2 = var0.read()) {
+                var1.write(var2);
+            }
+
+            Image var4 = Toolkit.getDefaultToolkit().createImage(var1.toByteArray());
+            loadImage(var4);
+            return var4;
+        } catch (Exception var3) {
+            throw new ErrorException("Exception: " + var3);
+        }
+    }
+
+    public static Image createImage(String[] var0) {
+        return createImage((InputStream)(new HexInputStream(var0)));
+    }
+
+    public static int[][] getPixelArray(Image var0) {
+        Component var1 = getImageObserver();
+        int var2 = var0.getWidth(var1);
+        int var3 = var0.getHeight(var1);
+        int[] var4 = new int[var2 * var3];
+        int[][] var5 = new int[var3][var2];
+        PixelGrabber var6 = new PixelGrabber(var0.getSource(), 0, 0, var2, var3, var4, 0, var2);
+
+        try {
+            var6.grabPixels();
+        } catch (InterruptedException var8) {
+            throw new ErrorException("Transfer interrupted");
+        }
+
+        if ((var6.getStatus() & 128) != 0) {
+            throw new ErrorException("Transfer aborted");
+        } else {
+            for(int var7 = 0; var7 < var3; ++var7) {
+                System.arraycopy(var4, var7 * var2, var5[var7], 0, var2);
+            }
+
+            return var5;
+        }
+    }
+
+    public static void saveImage(Image var0, String var1) {
+        saveImage(var0, new File(var1));
+    }
+
+    public static void saveImage(Image var0, File var1) {
+        String var2 = var1.getName();
+        int var3 = var2.lastIndexOf(46);
+        if (var3 <= 0) {
+            throw new ErrorException("saveImage: No image suffix in file name");
+        } else {
+            String var4 = var2.substring(var3 + 1);
+            ImageSaver var5 = findImageSaver(var4);
+            if (var5 == null) {
+                throw new ErrorException("saveImage: No support for ." + var4 + " format");
+            } else if (var1.exists() && !var1.delete()) {
+                throw new ErrorException("saveImage: Cannot replace " + var2);
+            } else {
+                try {
+                    BufferedOutputStream var6 = new BufferedOutputStream(new FileOutputStream(var1));
+                    var5.setOutputStream(var6);
+                    var5.saveImage(var0);
+                    var5.updateFileType(var1);
+                    var6.close();
+                } catch (IOException var7) {
+                    throw new ErrorException("saveImage: " + var7.getMessage());
+                }
+            }
+        }
+    }
+
+    public static Image createPSPreviewImage(Image var0, String[] var1) {
+        return new PSPreviewImage(var0, var1);
+    }
+
+    public static AudioClip loadAudioClip(String var0) {
+        return loadAudioClip(var0, ".:sounds");
+    }
+
+    public static AudioClip loadAudioClip(String var0, String var1) {
+        AudioClip var2 = (AudioClip)audioClipTable.get(var0);
+        if (var2 != null) {
+            return var2;
+        } else if (var0.startsWith("http:")) {
+            try {
+                var2 = loadAudioClip(new URL(var0));
+                if (var2 instanceof SoundClip) {
+                    ((SoundClip)var2).setName(var0);
+                }
+
+                if (cachingEnabled) {
+                    audioClipTable.put(var0, var2);
+                }
+
+                return var2;
+            } catch (MalformedURLException var9) {
+                throw new ErrorException("loadAudioClip: Malformed URL");
+            }
+        } else {
+            StringTokenizer var3 = new StringTokenizer(var1, ":");
+
+            while(var2 == null && var3.hasMoreTokens()) {
+                String var4 = var3.nextToken();
+                var4 = var4.equals(".") ? "" : var4 + "/";
+                URL var5 = null;
+
+                try {
+                    var5 = RESOURCE_CLASS.getResource("/" + var4 + var0);
+                    URLConnection var6 = var5.openConnection();
+                    if (var6 == null || var6.getContentLength() <= 0) {
+                        var5 = null;
+                    }
+                } catch (Exception var12) {
+                }
+
+                if (var5 == null) {
+                    Applet var13 = JTFTools.getApplet();
+                    if (var13 != null) {
+                        URL var7 = var13.getCodeBase();
+                        if (var7 != null) {
+                            try {
+                                var5 = new URL(var7, var4 + var0);
+                            } catch (MalformedURLException var11) {
+                            }
+                        }
+                    }
+                }
+
+                if (var5 == null) {
+                    try {
+                        File var14 = new File(var4 + var0);
+                        if (var14.canRead()) {
+                            var2 = createAudioClip((InputStream)(new FileInputStream(var14)));
+                        }
+                    } catch (Exception var10) {
+                    }
+                } else {
+                    var2 = loadAudioClip(var5, false);
+                }
+            }
+
+            if (var2 == null) {
+                throw new ErrorException("Cannot find an audio clip named " + var0);
+            } else {
+                if (var2 instanceof SoundClip) {
+                    ((SoundClip)var2).setName(var0);
+                }
+
+                if (cachingEnabled) {
+                    audioClipTable.put(var0, var2);
+                }
+
+                return var2;
+            }
+        }
+    }
+
+    public static AudioClip loadAudioClip(URL var0) {
+        return loadAudioClip(var0, true);
+    }
+
+    public static void defineAudioClip(String var0, AudioClip var1) {
+        audioClipTable.put(var0, var1);
+    }
+
+    public static void flushAudioClip(String var0) {
+        audioClipTable.remove(var0);
+    }
+
+    public static AudioClip createAudioClip(InputStream var0) {
+        try {
+            return new SoundClip(var0);
+        } catch (Exception var4) {
+            try {
+                return new SunAudioClip(var0);
+            } catch (Exception var3) {
+                return new NullAudioClip();
+            }
+        }
+    }
+
+    public static AudioClip createAudioClip(String[] var0) {
+        return createAudioClip((InputStream)(new HexInputStream(var0)));
+    }
+
+    public static InputStream openDataFile(String var0) {
+        return openDataFile(var0, ".:datafiles");
+    }
+
+    public static InputStream openDataFile(String var0, String var1) {
+        Object var2 = null;
+        if (var0.startsWith("http:")) {
+            try {
+                return openDataFile(new URL(var0));
+            } catch (MalformedURLException var9) {
+                throw new ErrorException("openDataFile: Malformed URL");
+            }
+        } else {
+            StringTokenizer var3 = new StringTokenizer(var1, ":");
+
+            while(var2 == null && var3.hasMoreTokens()) {
+                String var4 = var3.nextToken();
+                var4 = var4.equals(".") ? "" : var4 + "/";
+                URL var5 = null;
+
+                try {
+                    var5 = RESOURCE_CLASS.getResource("/" + var4 + var0);
+                    URLConnection var6 = var5.openConnection();
+                    if (var6 == null || var6.getContentLength() <= 0) {
+                        var5 = null;
+                    }
+                } catch (Exception var12) {
+                }
+
+                if (var5 == null) {
+                    Applet var13 = JTFTools.getApplet();
+                    if (var13 != null) {
+                        URL var7 = var13.getCodeBase();
+                        if (var7 != null) {
+                            try {
+                                var5 = new URL(var7, var4 + var0);
+                            } catch (MalformedURLException var11) {
+                            }
+                        }
+                    }
+                }
+
+                if (var5 == null) {
+                    try {
+                        File var14 = new File(var4 + var0);
+                        if (var14.canRead()) {
+                            var2 = new FileInputStream(var14);
+                        }
+                    } catch (Exception var10) {
+                    }
+                } else {
+                    var2 = openDataFile(var5, false);
+                }
+            }
+
+            if (var2 == null) {
+                throw new ErrorException("Cannot find a file named " + var0);
+            } else {
+                return (InputStream)var2;
+            }
+        }
+    }
+
+    public static InputStream openDataFile(URL var0) {
+        return openDataFile(var0, true);
+    }
+
+    public static BufferedImage createBufferedImage(Image var0, int var1) {
+        int var2 = var0.getWidth((ImageObserver)null);
+        int var3 = var0.getHeight((ImageObserver)null);
+        BufferedImage var4 = new BufferedImage(var2, var3, var1);
+        Graphics2D var5 = var4.createGraphics();
+        var5.drawImage(var0, 0, 0, (ImageObserver)null);
+        var5.dispose();
+        return var4;
+    }
+
+    public static InputStream getHexInputStream(String[] var0) {
+        return new HexInputStream(var0);
+    }
+
+    public static void setCachingEnabled(boolean var0) {
+        cachingEnabled = var0;
+    }
+
+    public static boolean isCachingEnabled() {
+        return cachingEnabled;
+    }
+
+    public static Component getImageObserver() {
+        return JTFTools.createEmptyContainer();
+    }
+
+    public static void beep() {
+        Toolkit.getDefaultToolkit().beep();
+    }
+
+    public static Image loadImage(URL var0, boolean var1) {
+        Image var2 = null;
+        Toolkit var3 = Toolkit.getDefaultToolkit();
+
+        try {
+            URLConnection var4 = var0.openConnection();
+            if (isResource(var0) || var4.getContentLength() > 0) {
+                Object var5 = var4.getContent();
+                if (var5 instanceof ImageProducer) {
+                    var2 = var3.createImage((ImageProducer)var5);
+                } else if (var5 != null) {
+                    var2 = var3.getImage(var0);
+                }
+            }
+        } catch (IOException var6) {
+        }
+
+        if (var1) {
+            if (var2 == null) {
+                throw new ErrorException("Cannot load image from " + var0);
+            }
+
+            loadImage(var2);
+        }
+
+        return var2;
+    }
+
+    private static ImageSaver findImageSaver(String var0) {
+        var0 = var0.toUpperCase();
+        synchronized(suffixTable) {
+            ImageSaver var2 = (ImageSaver)suffixTable.get(var0);
+            if (var2 == null) {
+                try {
+                    Class var3 = Class.forName("acm.util." + var0 + "ImageSaver");
+                    var2 = (ImageSaver)var3.newInstance();
+                } catch (Exception var5) {
+                    return null;
+                }
+
+                suffixTable.put(var0, var2);
+            }
+
+            return var2;
+        }
+    }
+
+    public static AudioClip loadAudioClip(URL var0, boolean var1) {
+        AudioClip var2 = null;
+
+        try {
+            URLConnection var3 = var0.openConnection();
+            if (isResource(var0) || var3.getContentLength() > 0) {
+                var2 = createAudioClip(var3.getInputStream());
+            }
+        } catch (IOException var4) {
+        }
+
+        if (var1 && var2 == null) {
+            throw new ErrorException("Cannot load audio clip from " + var0);
+        } else {
+            return var2;
+        }
+    }
+
+    public static InputStream openDataFile(URL var0, boolean var1) {
+        InputStream var2 = null;
+
+        try {
+            URLConnection var3 = var0.openConnection();
+            if (isResource(var0) || var3.getContentLength() > 0) {
+                var2 = var3.getInputStream();
+            }
+        } catch (IOException var4) {
+        }
+
+        if (var1 && var2 == null) {
+            throw new ErrorException("Cannot read data from " + var0);
+        } else {
+            return var2;
+        }
+    }
+
+    private static boolean isResource(URL var0) {
+        String var1 = var0.toString().toLowerCase();
+        return var1.startsWith("jar:") || var1.startsWith("file:");
+    }
+}
