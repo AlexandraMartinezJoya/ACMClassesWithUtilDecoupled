@@ -1,0 +1,205 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package acm.util;
+
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Vector;
+
+class Gif89Encoder {
+    private Dimension dispDim;
+    private GifColorTable colorTable;
+    private int bgIndex;
+    private int loopCount;
+    private String theComments;
+    private Vector<Gif89Frame> vFrames;
+
+    public Gif89Encoder() {
+        this.dispDim = new Dimension(0, 0);
+        this.bgIndex = 0;
+        this.loopCount = 1;
+        this.vFrames = new Vector();
+        this.colorTable = new GifColorTable();
+    }
+
+    public Gif89Encoder(Image var1) throws IOException {
+        this();
+        this.addFrame(var1);
+    }
+
+    public Gif89Encoder(Color[] var1) {
+        this.dispDim = new Dimension(0, 0);
+        this.bgIndex = 0;
+        this.loopCount = 1;
+        this.vFrames = new Vector();
+        this.colorTable = new GifColorTable(var1);
+    }
+
+    public Gif89Encoder(Color[] var1, int var2, int var3, byte[] var4) throws IOException {
+        this(var1);
+        this.addFrame(var2, var3, var4);
+    }
+
+    public int getFrameCount() {
+        return this.vFrames.size();
+    }
+
+    public Gif89Frame getFrameAt(int var1) {
+        return this.isOk(var1) ? (Gif89Frame)this.vFrames.elementAt(var1) : null;
+    }
+
+    public void addFrame(Gif89Frame var1) throws IOException {
+        this.accommodateFrame(var1);
+        this.vFrames.addElement(var1);
+    }
+
+    public void addFrame(Image var1) throws IOException {
+        this.addFrame((Gif89Frame)(new DirectGif89Frame(var1)));
+    }
+
+    public void addFrame(int var1, int var2, byte[] var3) throws IOException {
+        this.addFrame((Gif89Frame)(new IndexGif89Frame(var1, var2, var3)));
+    }
+
+    public void insertFrame(int var1, Gif89Frame var2) throws IOException {
+        this.accommodateFrame(var2);
+        this.vFrames.insertElementAt(var2, var1);
+    }
+
+    public void setTransparentIndex(int var1) {
+        this.colorTable.setTransparent(var1);
+    }
+
+    public void setLogicalDisplay(Dimension var1, int var2) {
+        this.dispDim = new Dimension(var1);
+        this.bgIndex = var2;
+    }
+
+    public void setLoopCount(int var1) {
+        this.loopCount = var1;
+    }
+
+    public void setComments(String var1) {
+        this.theComments = var1;
+    }
+
+    public void setUniformDelay(int var1) {
+        for(int var2 = 0; var2 < this.vFrames.size(); ++var2) {
+            ((Gif89Frame)this.vFrames.elementAt(var2)).setDelay(var1);
+        }
+
+    }
+
+    public void encode(OutputStream var1) throws IOException {
+        int var2 = this.getFrameCount();
+        boolean var3 = var2 > 1;
+        this.colorTable.closePixelProcessing();
+        Gif89Put.ascii("GIF89a", var1);
+        this.writeLogicalScreenDescriptor(var1);
+        this.colorTable.encode(var1);
+        if (var3 && this.loopCount != 1) {
+            this.writeNetscapeExtension(var1);
+        }
+
+        if (this.theComments != null && this.theComments.length() > 0) {
+            this.writeCommentExtension(var1);
+        }
+
+        for(int var4 = 0; var4 < var2; ++var4) {
+            ((Gif89Frame)this.vFrames.elementAt(var4)).encode(var1, var3, this.colorTable.getDepth(), this.colorTable.getTransparent());
+        }
+
+        var1.write(59);
+        var1.flush();
+    }
+
+    public static void main(String[] var0) {
+        try {
+            Toolkit var1 = Toolkit.getDefaultToolkit();
+            BufferedOutputStream var2 = new BufferedOutputStream(new FileOutputStream("gif89out.gif"));
+            if (var0[0].toUpperCase().endsWith(".JPG")) {
+                (new Gif89Encoder(var1.getImage(var0[0]))).encode(var2);
+            } else {
+                BufferedReader var3 = new BufferedReader(new FileReader(var0[0]));
+                Gif89Encoder var4 = new Gif89Encoder();
+
+                while(true) {
+                    String var5;
+                    if ((var5 = var3.readLine()) == null) {
+                        var4.setLoopCount(0);
+                        var4.encode(var2);
+                        var3.close();
+                        break;
+                    }
+
+                    var4.addFrame(var1.getImage(var5.trim()));
+                }
+            }
+
+            var2.close();
+        } catch (Exception var9) {
+            var9.printStackTrace();
+        } finally {
+            System.exit(0);
+        }
+
+    }
+
+    private void accommodateFrame(Gif89Frame var1) throws IOException {
+        this.dispDim.width = Math.max(this.dispDim.width, var1.getWidth());
+        this.dispDim.height = Math.max(this.dispDim.height, var1.getHeight());
+        this.colorTable.processPixels(var1);
+    }
+
+    private void writeLogicalScreenDescriptor(OutputStream var1) throws IOException {
+        Gif89Put.leShort(this.dispDim.width, var1);
+        Gif89Put.leShort(this.dispDim.height, var1);
+        var1.write(240 | this.colorTable.getDepth() - 1);
+        var1.write(this.bgIndex);
+        var1.write(0);
+    }
+
+    private void writeNetscapeExtension(OutputStream var1) throws IOException {
+        var1.write(33);
+        var1.write(255);
+        var1.write(11);
+        Gif89Put.ascii("NETSCAPE2.0", var1);
+        var1.write(3);
+        var1.write(1);
+        Gif89Put.leShort(this.loopCount > 1 ? this.loopCount - 1 : 0, var1);
+        var1.write(0);
+    }
+
+    private void writeCommentExtension(OutputStream var1) throws IOException {
+        var1.write(33);
+        var1.write(254);
+        int var2 = this.theComments.length() % 255;
+        int var3 = this.theComments.length() / 255;
+        int var4 = var3 + (var2 > 0 ? 1 : 0);
+        int var5 = 0;
+
+        for(int var6 = 0; var6 < var4; ++var6) {
+            int var7 = var6 < var3 ? 255 : var2;
+            var1.write(var7);
+            Gif89Put.ascii(this.theComments.substring(var5, var5 + var7), var1);
+            var5 += var7;
+        }
+
+        var1.write(0);
+    }
+
+    private boolean isOk(int var1) {
+        return var1 >= 0 && var1 < this.vFrames.size();
+    }
+}
